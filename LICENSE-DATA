@@ -1,0 +1,91 @@
+# Licencia de los datos
+
+Este documento distingue dos cosas distintas: los datos de terremotos del
+USGS que consume el proyecto, y las teselas del mapa base que los dibuja.
+**El codigo fuente se licencia por separado bajo MIT.** Ver [LICENSE](LICENSE).
+
+## 1. Datos sismicos — U.S. Geological Survey (USGS)
+
+**Verificado via WebFetch el 2026-09-29** contra la pagina oficial de
+politica de derechos de autor del USGS
+(https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits):
+
+> "USGS-authored or produced data and information are considered to be in
+> the U.S. Public Domain."
+
+Es decir: la informacion producida por el USGS —lo que incluye el catalogo de
+eventos sismicos servido por el FDSN Event Web Service que consume este
+proyecto— es, como regla general, **dominio publico**, sin restriccion legal
+de uso, copia o redistribucion.
+
+**Excepciones que la propia pagina del USGS senala** (aplican a la agencia en
+general, no se verifico si tocan especificamente el catalogo de sismos):
+
+- Materiales de terceros (fotografias, imagenes, graficos) que el USGS usa con
+  permiso y marca como protegidos por derechos de autor ajenos.
+- Derechos de imagen de personas identificables en contenido multimedia del
+  USGS.
+
+**Atribucion:** no es legalmente obligatoria para dominio publico, pero el
+USGS la solicita explicitamente: *"When using information from USGS
+information products, publications, or websites, we ask that proper credit be
+given"*, con un formato sugerido tipo "Credit: U.S. Geological Survey /
+Department of the Interior/USGS". Por eso `CLAUDE.md` (regla 2) hace la
+atribucion obligatoria **para este proyecto** aunque el USGS no la exija: es
+una decision de integridad de fuente, no solo de cumplimiento legal.
+
+### Pendiente de verificar
+
+No se pudo confirmar, dentro de esta sesion, una pagina especifica de
+terminos de uso o licencia para el **FDSN Event Web Service** o para ComCat
+(el catalogo especifico que se consulta) distinta de la politica general de
+copyright de la agencia citada arriba. La pagina de ComCat
+(https://earthquake.usgs.gov/data/comcat/index.php) no contiene esa
+informacion en su version consultada. Antes de la Fase 4 (Publicacion),
+conviene revisar tambien:
+
+- https://www.usgs.gov/policies-and-notices (enlazada desde la documentacion
+  del servicio FDSN como "Legal")
+- Si existe alguna nota de terminos de uso especifica del servicio web (limite
+  de tasa, uso aceptable) mas alla del limite tecnico de 20 000 resultados por
+  consulta ya documentado en `docs/fases/FASE-1-DATOS.md`.
+
+Esto queda marcado como pendiente en vez de darse por cerrado.
+
+## 2. Teselas del mapa base
+
+La eleccion final de proveedor de teselas **queda abierta** en
+`docs/adr/ADR-001-leaflet.md` (seccion "Decision abierta"). Lo que si se
+verifico:
+
+**Si se usa el servidor por defecto de OpenStreetMap**
+(`tile.openstreetmap.org`), verificado via WebFetch el 2026-09-29 contra
+https://operations.osmfoundation.org/policies/tiles/:
+
+- Atribucion obligatoria y visible: **"© OpenStreetMap contributors"**, sin
+  poder ocultarla ni sacarla de pantalla.
+- Uso limitado a visualizacion interactiva (el patron de este proyecto);
+  prohibida la descarga masiva, el modo sin conexion y los bots.
+- Los datos subyacentes de OpenStreetMap se licencian bajo **ODbL 1.0** (Open
+  Database License), que es *share-alike*: una base de datos derivada de OSM
+  hereda esa obligacion. Este proyecto **no** redistribuye los datos de OSM
+  como base de datos propia — solo consume las teselas renderizadas como
+  imagenes para mostrar el mapa base, que es el uso que cubre la politica de
+  arriba — pero si en el futuro se extrajeran datos vectoriales de OSM (por
+  ejemplo, limites o toponimia, como hizo Orinoco Digital), esa porcion si
+  quedaria bajo ODbL y tendria que mantenerse separada e identificada, igual
+  que en `orinoco-digital` (ver su `LICENSE-DATA`).
+
+**Si en una fase futura se elige un proveedor alternativo** (comercial, con
+capa gratuita, o autoalojado), este documento se actualiza con su licencia y
+sus terminos especificos antes de que ese proveedor entre en produccion.
+
+## Resumen
+
+| Dato | Licencia / regimen | Obligacion |
+|---|---|---|
+| Catalogo de sismos (USGS FDSN) | Dominio publico (US Government work) | Ninguna legal; atribucion solicitada y aplicada por decision propia |
+| Teselas de OpenStreetMap (si se usan) | Politica operativa de uso + datos ODbL 1.0 subyacentes | Atribucion visible "© OpenStreetMap contributors"; sin descarga masiva |
+| Datos originales de este proyecto (curacion, contrato `fuente`/`confianza`/`ultima_verificacion`) | MIT, igual que el codigo — no hay un dataset propio independiente que amerite una licencia de datos separada como CC BY en esta fase | — |
+
+**El codigo fuente se licencia por separado bajo MIT.** Ver [LICENSE](LICENSE).

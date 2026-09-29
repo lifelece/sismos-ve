@@ -1,0 +1,14 @@
+{
+  "name": "sismos-ve",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Panel web de actividad sismica en Venezuela con datos publicos del USGS",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,25 @@
+node_modules/
+dist/
+dist-ssr/
+.vite/
+
+# Secretos: jamas versionados. No hay proveedor de teselas con clave todavia
+# (ver docs/adr/ADR-001-leaflet.md); si en el futuro lo hay, se crea
+# .env.example junto con el primer .env real.
+.env
+.env.local
+.env.*.local
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+.vercel
