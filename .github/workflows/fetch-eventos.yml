@@ -1,0 +1,76 @@
+# Descarga diaria del catalogo de sismos del USGS (Fase 1, ADR-002).
+#
+# Es la UNICA pieza del proyecto que habla con el servicio FDSN del USGS
+# (CLAUDE.md regla 3). Nada se publica sin revision: el workflow NUNCA toca
+# main. Descarga, valida el contrato, corre los tests y abre (o actualiza) un
+# PR desde la rama `datos-diario`. Luis lo revisa y lo mergea; merge = deploy.
+#
+# Por que valida y prueba aqui y no solo en validar-datos.yml: los PR creados
+# con GITHUB_TOKEN no disparan otros workflows (regla de GitHub contra bucles).
+# Sin esto el PR llegaria sin ningun check. Si algo falla, no hay PR.
+#
+# Requiere activar una vez, en GitHub -> Settings -> Actions -> General:
+# "Allow GitHub Actions to create and approve pull requests".
+#
+# Sin `npm install`: los scripts solo usan modulos nativos de Node.
+name: fetch-eventos
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # diario 06:17 UTC (02:17 en Venezuela); fuera de la hora en punto
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: fetch-eventos
+  cancel-in-progress: false
+
+jobs:
+  descargar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RAMA: datos-diario
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Descargar del USGS y aplicar el contrato de datos
+        run: |
+          set -o pipefail
+          node scripts/fetch-eventos.mjs | tee "$RUNNER_TEMP/informe.md"
+          cat "$RUNNER_TEMP/informe.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Validar data/eventos.json (contrato, region, JSON)
+        run: node scripts/validate-eventos.mjs
+      - name: Tests
+        run: npm test
+      - name: Commit en la rama datos-diario y PR
+        run: |
+          if [ -z "$(git status --porcelain -- data/eventos.json)" ]; then
+            echo "Sin cambios en data/eventos.json: no hay PR."
+            exit 0
+          fi
+          FECHA=$(date -u +%F)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # La rama se reconstruye cada dia desde main: el PR abierto, si lo
+          # hay, se actualiza en vez de acumular commits viejos.
+          git checkout -B "$RAMA"
+          git add data/eventos.json
+          git commit -m "Datos: catalogo de sismos del USGS ($FECHA)"
+          # Rama propia del bot, reconstruida desde main en cada corrida:
+          # --force es seguro aqui (nunca apunta a main).
+          git push --force origin "$RAMA"
+          TITULO="Datos: catalogo de sismos del USGS ($FECHA)"
+          CUERPO="$RUNNER_TEMP/informe.md"
+          printf '\n---\nGenerado por el workflow `fetch-eventos`. Revisar el diff antes de mergear (merge = deploy).\n' >> "$CUERPO"
+          if [ "$(gh pr list --head "$RAMA" --state open --json number --jq length)" = "0" ]; then
+            gh pr create --base main --head "$RAMA" --title "$TITULO" --body-file "$CUERPO"
+          else
+            gh pr edit "$RAMA" --title "$TITULO" --body-file "$CUERPO"
+          fi
