@@ -1,6 +1,6 @@
 # ADR-001 — Leaflet como motor de mapa
 
-**Fecha:** 2026-09-29 · **Estado:** Propuesto, pendiente de aprobacion de Luis
+**Fecha:** 2026-09-29 · **Estado:** Aceptado (Luis, 2026-10-20)
 en el STOP gate de la Fase 0
 
 ## Contexto

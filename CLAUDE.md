@@ -35,7 +35,7 @@ y prueba en telefono real.
 
 - **Frontend:** Vite + Vanilla JS ES6 (modulos nativos) + Tailwind CSS
 - **Mapa:** Leaflet — **ligero**, decision registrada en
-  `docs/adr/ADR-001-leaflet.md` (estado: Propuesto, pendiente de aprobacion)
+  `docs/adr/ADR-001-leaflet.md` (estado: Aceptado, 2026-10-20)
 - **Datos:** GeoJSON del servicio FDSN de eventos del USGS
   (`https://earthquake.usgs.gov/fdsnws/event/1/query`), descargado por una
   GitHub Action **diaria** y versionado en `data/eventos.json`

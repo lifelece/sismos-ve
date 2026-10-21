@@ -13,8 +13,8 @@ no se reescribe el que ya existe. El historial es el valor.
 
 | ADR | Titulo | Estado |
 |---|---|---|
-| [ADR-001](ADR-001-leaflet.md) | Leaflet como motor de mapa | Propuesto |
-| [ADR-002](ADR-002-static-first.md) | Static-first: Action diaria en vez de consulta en vivo | Propuesto |
+| [ADR-001](ADR-001-leaflet.md) | Leaflet como motor de mapa | Aceptado (2026-10-20) |
+| [ADR-002](ADR-002-static-first.md) | Static-first: Action diaria en vez de consulta en vivo | Aceptado (2026-10-20) |
 
 ## Plantilla
 
