@@ -2,7 +2,9 @@
 # datos, los scripts que los producen o validan, o sus tests. Sale en rojo si
 # data/eventos.json no es JSON valido, no es una FeatureCollection, o algun
 # registro no trae el contrato (fuente, confianza, ultima_verificacion), la
-# magnitud, un Point [lon, lat, profundidad_km] o cae fuera de la region.
+# magnitud, un Point [lon, lat, profundidad_km], cae fuera de la region, o sus
+# etiquetas en_venezuela / zona_disputada no coinciden con los poligonos de
+# data/ (ADR-003).
 #
 # Sin `npm install`: el validador y los tests solo usan modulos nativos de Node.
 name: validar-datos

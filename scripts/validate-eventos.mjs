@@ -11,7 +11,10 @@
  *   - no trae `mag` numerica o su geometria no es un Point
  *     [lon, lat, profundidad_km];
  *   - cae fuera de la region de la consulta o de la ventana temporal del
- *     catalogo.
+ *     catalogo;
+ *   - no trae las etiquetas de territorio `en_venezuela` y `zona_disputada`
+ *     (booleanos, nunca las dos en true) o, desde el CLI, si no coinciden con
+ *     los poligonos de data/ (ADR-003).
  *
  * Sin dependencias: solo modulos nativos de Node. El contrato es el nucleo
  * neutral de arsenal (schemas/procedencia.schema.json) con la armadura
@@ -22,30 +25,35 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { etiquetasDe, leerTerritorio } from "./territorio.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const RUTA_EVENTOS = join(RAIZ, "data", "eventos.json");
 
 /**
- * Region de la consulta FDSN (rectangulo, grados decimales WGS84).
- * Punto de partida geometrico de docs/fases/FASE-1-DATOS.md: un rectangulo
- * generoso alrededor de Venezuela continental que incluye trozos de los paises
- * vecinos y del Caribe. [A VERIFICAR POR LUIS] antes de cerrar la Fase 1.
+ * Region de la consulta FDSN (rectangulo, grados decimales WGS84): un
+ * rectangulo generoso alrededor de Venezuela que incluye trozos de los paises
+ * vecinos y del Caribe. Confirmado por Luis en el gate de la Fase 1
+ * (2026-10-21, "Rectangulo + etiqueta"): se descarga el rectangulo y cada
+ * evento lleva `en_venezuela` / `zona_disputada` (ADR-003).
  * scripts/fetch-eventos.mjs construye la consulta con estos mismos valores:
  * una sola fuente de verdad para la consulta y para la validacion.
  */
 export const REGION = Object.freeze({
-  latMin: 0.5, // [A VERIFICAR POR LUIS]
-  latMax: 13.0, // [A VERIFICAR POR LUIS]
-  lonMin: -73.5, // [A VERIFICAR POR LUIS]
-  lonMax: -59.5, // [A VERIFICAR POR LUIS]
+  latMin: 0.5,
+  latMax: 13.0,
+  lonMin: -73.5,
+  lonMax: -59.5,
 });
 
-/** Inicio del catalogo (ficha del proyecto). [A VERIFICAR POR LUIS] */
+/** Inicio del catalogo (ficha del proyecto; se mantiene en el gate F1). */
 export const INICIO_CATALOGO = "1990-01-01";
 
 /** Vocabulario cerrado de `confianza` (armadura "confianza-escala"). */
 export const CONFIANZAS = Object.freeze(["alta", "media", "baja"]);
+
+/** Etiquetas de territorio obligatorias (booleanos, ADR-003). */
+export const ETIQUETAS = Object.freeze(["en_venezuela", "zona_disputada"]);
 
 /** Holgura para relojes desfasados: un evento no puede venir del futuro. */
 const HOLGURA_FUTURO_MS = 24 * 60 * 60 * 1000;
@@ -60,8 +68,12 @@ export function esFechaISO(valor) {
 
 const esNumero = (v) => typeof v === "number" && Number.isFinite(v);
 
-/** Errores de un registro (lista vacia = registro valido). */
-export function validarEvento(feature, { ahora = Date.now() } = {}) {
+/**
+ * Errores de un registro (lista vacia = registro valido).
+ * Con `territorio` (de territorio.mjs) se recalculan las etiquetas contra los
+ * poligonos y se exige que coincidan: verifica la propiedad, no solo el tipo.
+ */
+export function validarEvento(feature, { ahora = Date.now(), territorio = null } = {}) {
   const errores = [];
 
   if (!feature || typeof feature !== "object" || feature.type !== "Feature") {
@@ -103,6 +115,22 @@ export function validarEvento(feature, { ahora = Date.now() } = {}) {
     }
   }
 
+  // Etiquetas de territorio (ADR-003).
+  let etiquetasBien = true;
+  for (const clave of ETIQUETAS) {
+    if (p[clave] === undefined || p[clave] === null) {
+      errores.push(`sin ${clave}`);
+      etiquetasBien = false;
+    } else if (typeof p[clave] !== "boolean") {
+      errores.push(`${clave} no es booleano (${JSON.stringify(p[clave])})`);
+      etiquetasBien = false;
+    }
+  }
+  if (p.en_venezuela === true && p.zona_disputada === true) {
+    errores.push("lleva las dos etiquetas en true (en_venezuela y zona_disputada son excluyentes)");
+    etiquetasBien = false;
+  }
+
   // Geometria: Point [lon, lat, profundidad_km].
   const g = feature.geometry;
   if (!g || g.type !== "Point" || !Array.isArray(g.coordinates)) {
@@ -113,6 +141,14 @@ export function validarEvento(feature, { ahora = Date.now() } = {}) {
     const [lon, lat] = g.coordinates;
     if (lat < REGION.latMin || lat > REGION.latMax || lon < REGION.lonMin || lon > REGION.lonMax) {
       errores.push(`fuera de la region de la consulta (lat ${lat}, lon ${lon})`);
+    }
+    if (territorio && etiquetasBien) {
+      const esperadas = etiquetasDe([lon, lat], territorio);
+      for (const clave of ETIQUETAS) {
+        if (p[clave] !== esperadas[clave]) {
+          errores.push(`${clave} = ${p[clave]} no coincide con el poligono de data/ (deberia ser ${esperadas[clave]})`);
+        }
+      }
     }
   }
 
@@ -159,7 +195,14 @@ export async function validarArchivo(ruta, opciones = {}) {
 async function main() {
   const ruta = process.argv[2] ? resolve(process.argv[2]) : RUTA_EVENTOS;
   console.log(`Validando ${ruta}`);
-  const { total, errores } = await validarArchivo(ruta);
+  let territorio;
+  try {
+    territorio = await leerTerritorio();
+  } catch (e) {
+    console.log(`  ERROR  no se pudieron leer los poligonos de data/: ${e.message}`);
+    process.exit(1);
+  }
+  const { total, errores } = await validarArchivo(ruta, { territorio });
   for (const e of errores) console.log(`  ERROR  ${e}`);
   console.log(`${total} eventos, ${errores.length} errores.`);
   if (errores.length > 0) {

@@ -80,11 +80,49 @@ https://operations.osmfoundation.org/policies/tiles/:
 capa gratuita, o autoalojado), este documento se actualiza con su licencia y
 sus terminos especificos antes de que ese proveedor entre en produccion.
 
+## 3. Limites de Venezuela y zona en disputa (desde la Fase 1)
+
+`data/limites-venezuela.geojson` y `data/zona-disputada.geojson` son copias
+**sin modificar** de los archivos publicos de
+[orinoco-digital](https://github.com/lifelece/orinoco-digital)
+(`public/data/`, rama `main` en el commit `aa108df`; ultimo cambio de
+ambos archivos en `593b45d`, 2026-09-25). Las licencias y la procedencia se
+verificaron en `docs/DATA_SOURCES.md` (secciones 12 y 13) y `LICENSE-DATA` de
+ese proyecto:
+
+| Contenido | Fuente | Licencia | Obligacion |
+|---|---|---|---|
+| Frontera nacional (`nivel: "pais"`, 23 anillos: tierra firme e islas) | geoBoundaries gbOpen VEN ADM0, origen Natural Earth | Dominio publico | Ninguna (cita recomendada) |
+| Limites estatales (`nivel: "estado"`) | geoBoundaries gbOpen VEN ADM1, origen OCHA Venezuela / Instituto Nacional de Estadistica | CC BY 3.0 IGO | **Atribucion e indicacion de cambios**: geometria simplificada por orinoco-digital (Douglas-Peucker, 0,004 grados; coordenadas a 4 decimales) |
+| Zona en disputa de la Guayana Esequiba | Natural Earth, `ne_10m_admin_0_disputed_areas` (`TYPE: Disputed`) | Dominio publico | Ninguna (cita recomendada) |
+
+Atribucion que usa este proyecto (README y pie de la interfaz):
+
+> Limites: geoBoundaries (Runfola et al., 2020, *PLoS ONE* 15(4): e0231866),
+> con datos de Natural Earth y de OCHA Venezuela / INE (CC BY 3.0 IGO;
+> geometria simplificada). Zona en disputa: Natural Earth.
+
+Huellas SHA-256 de las copias (para comprobar que no se tocaron):
+
+```
+e2daf4bf3298682a9900680fd9746017c58db4321ee987250e8555fb87d0165c  data/limites-venezuela.geojson
+fde72d239eaba1ffa3ad9d36ad2f59b5e8c83ebd75d4b9d1adc9e9f5ae03ed46  data/zona-disputada.geojson
+```
+
+**Uso.** La frontera nacional y la zona en disputa sirven para calcular las
+etiquetas `en_venezuela` y `zona_disputada` de cada evento
+(`scripts/territorio.mjs`, ADR-003). Ninguna de las dos fuentes afirma
+soberania: la zona en disputa se reproduce con la clasificacion que le da
+Natural Earth, y la frontera de geoBoundaries sigue la linea administrada de
+facto. El proyecto no toma posicion (regla 9 de `CLAUDE.md`).
+
 ## Resumen
 
 | Dato | Licencia / regimen | Obligacion |
 |---|---|---|
 | Catalogo de sismos (USGS FDSN) | Dominio publico (US Government work) | Ninguna legal; atribucion solicitada y aplicada por decision propia |
+| Frontera nacional y zona en disputa (geoBoundaries ADM0 / Natural Earth) | Dominio publico | Ninguna legal; cita aplicada (seccion 3) |
+| Limites estatales (geoBoundaries ADM1, OCHA Venezuela / INE) | CC BY 3.0 IGO | Atribucion e indicacion de cambios (seccion 3) |
 | Teselas de OpenStreetMap (si se usan) | Politica operativa de uso + datos ODbL 1.0 subyacentes | Atribucion visible "© OpenStreetMap contributors"; sin descarga masiva |
 | Datos originales de este proyecto (curacion, contrato `fuente`/`confianza`/`ultima_verificacion`) | MIT, igual que el codigo — no hay un dataset propio independiente que amerite una licencia de datos separada como CC BY en esta fase | — |
 

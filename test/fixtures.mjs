@@ -43,11 +43,17 @@ export function eventoUsgs() {
   };
 }
 
-/** El mismo evento con el contrato de datos ya aplicado. */
+/**
+ * El mismo evento con el contrato de datos y las etiquetas de territorio ya
+ * aplicados. Cepita esta en Colombia: fuera de Venezuela y de la zona en
+ * disputa (comprobado contra los poligonos reales en territorio.test.mjs).
+ */
 export function eventoValido() {
   const f = eventoUsgs();
   f.properties.fuente = "USGS FDSN Event Web Service";
   f.properties.confianza = "alta";
   f.properties.ultima_verificacion = "2026-10-20";
+  f.properties.en_venezuela = false;
+  f.properties.zona_disputada = false;
   return f;
 }

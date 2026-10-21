@@ -11,7 +11,8 @@
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",
     "data:fetch": "node scripts/fetch-eventos.mjs",
-    "data:validate": "node scripts/validate-eventos.mjs"
+    "data:validate": "node scripts/validate-eventos.mjs",
+    "data:etiquetar": "node scripts/etiquetar-eventos.mjs"
   },
   "dependencies": {},
   "devDependencies": {}

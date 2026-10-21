@@ -12,6 +12,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { esFechaISO, validarColeccion, validarEvento } from "../scripts/validate-eventos.mjs";
+import { leerTerritorio } from "../scripts/territorio.mjs";
 import { eventoValido } from "./fixtures.mjs";
 
 const SCRIPT = fileURLToPath(new URL("../scripts/validate-eventos.mjs", import.meta.url));
@@ -95,6 +96,40 @@ test("esFechaISO solo acepta AAAA-MM-DD existentes", () => {
   assert.equal(esFechaISO("2025-02-29"), false);
   assert.equal(esFechaISO("2026-10-20T00:00:00Z"), false);
   assert.equal(esFechaISO(20261020), false);
+});
+
+// --- Etiquetas de territorio (gate F1, 2026-10-21) -------------------------
+
+test("faltan en_venezuela o zona_disputada, o no son booleanos", () => {
+  assert.match(erroresDe(evento({ props: { en_venezuela: undefined } })).join(), /sin en_venezuela/);
+  assert.match(erroresDe(evento({ props: { zona_disputada: undefined } })).join(), /sin zona_disputada/);
+  assert.match(erroresDe(evento({ props: { en_venezuela: "true" } })).join(), /en_venezuela no es booleano/);
+  assert.match(erroresDe(evento({ props: { zona_disputada: 1 } })).join(), /zona_disputada no es booleano/);
+});
+
+test("un evento no puede estar a la vez en Venezuela y en la zona en disputa", () => {
+  const doble = evento({ props: { en_venezuela: true, zona_disputada: true } });
+  assert.match(erroresDe(doble).join(), /las dos etiquetas/);
+});
+
+test("con el territorio, una etiqueta que no coincide con el poligono tumba el registro", async () => {
+  const territorio = await leerTerritorio();
+  const conTerritorio = (f) => validarEvento(f, { ahora: Date.parse("2026-10-20T12:00:00Z"), territorio });
+  // Cepita (Colombia) marcado como Venezuela: mentira detectable.
+  assert.match(conTerritorio(evento({ props: { en_venezuela: true } })).join(), /en_venezuela = true no coincide/);
+  // Caracas marcado fuera de Venezuela.
+  const caracas = evento({ coordenadas: [-66.9036, 10.4806, 5] });
+  assert.match(conTerritorio(caracas).join(), /en_venezuela = false no coincide/);
+  // Las etiquetas correctas pasan.
+  assert.deepEqual(conTerritorio(evento()), []);
+  assert.deepEqual(conTerritorio(evento({ coordenadas: [-66.9036, 10.4806, 5], props: { en_venezuela: true } })), []);
+});
+
+test("el CLI comprueba las etiquetas contra los poligonos de data/", async () => {
+  await conArchivo(JSON.stringify(coleccion([evento({ props: { en_venezuela: true } })])), (r) => {
+    assert.equal(r.status, 1, r.stdout);
+    assert.match(r.stdout, /no coincide con el poligono/);
+  });
 });
 
 // --- Magnitud, hora y geometria --------------------------------------------

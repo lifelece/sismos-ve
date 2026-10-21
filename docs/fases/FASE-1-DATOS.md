@@ -5,9 +5,9 @@
 > oficial del USGS (https://earthquake.usgs.gov/earthquakes/map/) y que
 > coincidan.
 
-**Tiempo estimado:** 1-2 sesiones · **Estado:** entregables listos en la rama
-`f1-datos` (2026-10-20); **esperando el STOP gate de Luis** (ver "Verificacion
-del gate" al final)
+**Tiempo estimado:** 1-2 sesiones · **Estado:** **cerrada** (gate de Luis,
+2026-10-21: "Rectangulo + etiqueta"; ver "Cierre del gate" al final). Rama
+`f1-datos`.
 
 ## Objetivo
 
@@ -32,7 +32,11 @@ esperados. La web **nunca** llama al USGS en tiempo de ejecucion (regla 3 de
 - `data/eventos.json` — el catalogo curado (se genera al correr la Action;
   no se escribe a mano)
 
-## Plantilla de la consulta FDSN — bounding box A VERIFICAR POR LUIS
+## Plantilla de la consulta FDSN — confirmada en el gate (2026-10-21)
+
+> **Cerrado.** Luis confirmo el rectangulo con etiqueta por poligono, M>=3 y
+> desde 1990 (ver "Cierre del gate" y ADR-003). El texto de abajo se conserva
+> como historial de la decision.
 
 **Esta plantilla no esta cerrada.** El bounding box de abajo es un punto de
 partida geometrico (un rectangulo generoso alrededor del territorio
@@ -131,19 +135,21 @@ esta fase, no en la Fase 0.
 
 ## Criterios de salida
 
-- [ ] Bounding box y parametros de la consulta confirmados por Luis (ya no
-      "a verificar")
+- [x] Bounding box y parametros de la consulta confirmados por Luis
+      (2026-10-21: rectangulo + etiqueta `en_venezuela`/`zona_disputada`,
+      M>=3, desde 1990, confianza solo con los niveles del USGS)
 - [ ] `data/eventos.json` generado por la Action, no escrito a mano — hoy lo
       genero `scripts/fetch-eventos.mjs` en una corrida local real; falta la
       primera corrida de la Action cuando el repo tenga remoto
 - [x] Contrato de datos completo en el 100% de los registros (4358/4358,
-      `node scripts/validate-eventos.mjs` → 0 errores)
+      `node scripts/validate-eventos.mjs` → 0 errores), etiquetas de
+      territorio incluidas y recalculadas contra los poligonos
 - [ ] Validador en CI, verificado con un dato malo de prueba (falla) y con el
       dato real (pasa) — verificado en local y en `npm test` (34 tests);
       falta verlo en GitHub Actions cuando exista el remoto
-- [ ] 10 eventos comparados uno a uno contra el sitio del USGS — comparados
-      por Claude Code contra el feed de cada ficha (10/10 coinciden); falta
-      la repeticion visual de Luis
+- [x] 10 eventos comparados uno a uno contra el sitio del USGS — comparados
+      por Claude Code contra el feed de cada ficha (10/10 coinciden); Luis
+      cerro el gate sin repetirlo (puede hacerlo con la tabla de abajo)
 
 ## STOP GATE
 
@@ -233,3 +239,86 @@ Filas 1-5: mayor magnitud. Filas 6-10: equiespaciadas (6 es el evento mas
 reciente del archivo y 10 el mas antiguo). Que 5 de los 10 caigan fuera de
 Venezuela no es un error de la consulta: es el reparto real del rectangulo
 provisional (ver hallazgos arriba).
+
+## Cierre del gate (2026-10-21)
+
+**Decision de Luis: "Rectangulo + etiqueta"** (ADR-003, aceptada). Se sigue
+descargando el rectangulo y cada evento lleva `en_venezuela` y
+`zona_disputada`. En la Fase 2 el mapa muestra solo Venezuela por defecto,
+con un interruptor para ver la region. Se mantienen M>=3, desde 1990, y
+`confianza` solo con los niveles del USGS (sin `baja`) salvo objecion de
+Luis.
+
+### Implementacion (Claude Code)
+
+- Poligonos: `data/limites-venezuela.geojson` y `data/zona-disputada.geojson`,
+  copias sin cambios de orinoco-digital (`public/data/`, `main` en
+  `aa108df`). Fuente, licencia, atribucion y SHA-256 en `LICENSE-DATA` §3.
+  Vienen como LineString cerrados (limites para dibujar):
+  `scripts/territorio.mjs` reconstruye los poligonos por anidamiento de
+  anillos (profundidad par = tierra, impar = hueco). Venezuela sale como
+  MultiPolygon de 23 poligonos (tierra firme, islas del Caribe y del delta),
+  sin huecos.
+- Punto en poligono por ray casting par-impar, sin dependencias, con huecos
+  y MultiPolygon; caja envolvente para descartar rapido.
+- Las etiquetas se calculan en `fetch-eventos.mjs` (Action diaria) y, sin
+  red, con `npm run data:etiquetar` (`scripts/etiquetar-eventos.mjs`), que
+  no toca `ultima_verificacion` ni ningun dato del USGS.
+- `data/eventos.json` se regenero con ese paso, sin volver a consultar al
+  USGS. `metadata.etiquetas` cita la procedencia de los poligonos.
+- Validador: exige las dos etiquetas como booleanos, nunca las dos en true;
+  desde el CLI (y en el CI) las recalcula contra `data/` y falla si alguna
+  no coincide.
+- Solape: las dos fuentes trazan la frontera de facto con vertices distintos y
+  dejan franjas finas en los dos poligonos (24 puntos de una malla de 0,01
+  grados sobre toda la frontera). Ahi gana `zona_disputada`.
+- Tests (`test/territorio.test.mjs`): geometria sintetica (huecos,
+  MultiPolygon, U concava, rayo por un vertice, anidamiento isla-lago-
+  continente) y casos borde con los poligonos reales: costa (El Avila / mar
+  frente a La Guaira, Puerto Cabello), islas (Margarita, La Tortuga, mar entre
+  Araya y Margarita), Esequibo, Georgetown, Colombia (Cepita, Cucuta), Trinidad,
+  Brasil, Santa Elena de Uairen y eventos reales del cotejo.
+
+### Resultado sobre el catalogo del 2026-10-21
+
+| Etiqueta | Eventos |
+|---|---|
+| `en_venezuela: true` | 645 |
+| `zona_disputada: true` | 6 (todos "km SSE of Lethem, Guyana", al oeste del rio Esequibo) |
+| Ninguna de las dos (mar o paises vecinos) | 3707 |
+| Total | 4358 |
+
+### Limites conocidos
+
+1. **El mar queda en `false`.** El poligono es terrestre. De los 1528 eventos
+   con "Venezuela" en la etiqueta de lugar del USGS, **925 caen en el mar**
+   (Golfo de Paria, costa central y oriental, frente a Guiria, Carupano o La
+   Guaira). La vista "solo Venezuela" de la Fase 2 no los mostrara: es el
+   limite mas visible de esta decision.
+2. **Simplificacion de ~440 m** en la linea de geoBoundaries. Un epicentro a
+   menos de ~0,5 km de la costa o la frontera puede caer del otro lado; los
+   epicentros del USGS tienen incertidumbres de kilometros, asi que la
+   etiqueta nunca es mas precisa que el dato.
+3. **La frontera es la de facto.** geoBoundaries traza el limite oriental en
+   la linea administrada por Guyana; por eso la zona en disputa va en etiqueta
+   propia y nunca se cuenta como `en_venezuela`. Mismo trato que
+   orinoco-digital: la clasificacion la pone Natural Earth.
+4. Un punto exactamente sobre un borde puede salir dentro o fuera.
+
+### Propuesta para Luis: capa de zona economica exclusiva (ZEE)
+
+Para que los sismos del mar venezolano no desaparezcan de la vista por
+defecto. Dos opciones, a decidir por Luis (no implementadas):
+
+- **A. ZEE oficial**: una tercera etiqueta `en_zee` con los limites
+  maritimos de Marine Regions (Flanders Marine Institute, "Maritime
+  Boundaries / World EEZ"). Licencia y version **a verificar** antes de
+  usarla. Ojo: varias fronteras maritimas de Venezuela no estan acordadas
+  (Golfo de Venezuela con Colombia, la fachada del Esequibo con Guyana), asi
+  que necesitaria el mismo trato neutral que la zona en disputa.
+- **B. Franja costera** sin datos nuevos: "a menos de N km de la costa
+  venezolana", calculada con el mismo poligono. Mas simple y sin licencias,
+  pero no es un limite juridico y habria que decir N.
+
+Recomendacion de Claude Code: B para la Fase 2-3 (cero dependencias, cero
+licencias nuevas) y A solo si el proyecto necesita hablar de jurisdiccion.

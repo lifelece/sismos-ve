@@ -11,7 +11,9 @@
  * 2. Descarga el GeoJSON (/query) y envuelve cada evento con el contrato de
  *    datos (fuente, confianza, ultima_verificacion) SIN descartar ningun campo
  *    original del USGS (CLAUDE.md seccion 5).
- * 3. Valida la coleccion con el mismo validador del CI y solo entonces
+ * 3. Etiqueta cada evento con `en_venezuela` y `zona_disputada` contra los
+ *    poligonos versionados en data/ (ADR-003, scripts/territorio.mjs).
+ * 4. Valida la coleccion con el mismo validador del CI y solo entonces
  *    escribe data/eventos.json (un evento por linea, para diffs legibles).
  *
  * Sin dependencias: `fetch` global de Node 20+.
@@ -27,14 +29,21 @@ import {
   RUTA_EVENTOS,
   validarColeccion,
 } from "./validate-eventos.mjs";
+import { etiquetarTerritorio, leerTerritorio } from "./territorio.mjs";
 
 export const SERVICIO_FDSN = "https://earthquake.usgs.gov/fdsnws/event/1";
 
 /** Valor fijo de `fuente` (FASE-1-DATOS.md, "Contrato de datos"). */
 export const FUENTE = "USGS FDSN Event Web Service";
 
-/** Umbral de la ficha del proyecto. [A VERIFICAR POR LUIS] */
+/** Umbral de la ficha del proyecto (se mantiene en el gate F1, 2026-10-21). */
 export const MAGNITUD_MINIMA = 3;
+
+/** Procedencia de las etiquetas de territorio, para metadata (ADR-003). */
+export const FUENTE_ETIQUETAS =
+  "en_venezuela: geoBoundaries gbOpen VEN ADM0 (Natural Earth), dominio publico; " +
+  "zona_disputada: Natural Earth ne_10m_admin_0_disputed_areas, dominio publico. " +
+  "Poligonos terrestres: un epicentro en el mar queda en false.";
 
 /** Maximo de resultados por consulta que admite el servicio FDSN del USGS. */
 export const LIMITE_FDSN = 20000;
@@ -93,6 +102,18 @@ export function aplicarContrato(feature, fechaVerificacion) {
 }
 
 /**
+ * Copia de la coleccion con las etiquetas de territorio en cada evento. No
+ * toca ningun otro campo; aplicarla dos veces da lo mismo (idempotente).
+ */
+export function etiquetarColeccion(coleccion, territorio) {
+  return {
+    ...coleccion,
+    metadata: { ...coleccion.metadata, etiquetas: FUENTE_ETIQUETAS },
+    features: coleccion.features.map((f) => etiquetarTerritorio(f, territorio)),
+  };
+}
+
+/**
  * Decide si el total de /count permite descargar sin truncar.
  * Lanza si no; devuelve un aviso (o null) si se puede seguir.
  */
@@ -132,10 +153,18 @@ async function obtenerJson(url, { fetchImpl, intentos = 3, esperaMs = 5000 }) {
 }
 
 /**
- * Consulta el FDSN y devuelve la FeatureCollection con el contrato aplicado.
- * `fetchImpl` y `ahora` se inyectan para poder probarlo sin red.
+ * Consulta el FDSN y devuelve la FeatureCollection con el contrato y las
+ * etiquetas de territorio aplicados. `fetchImpl`, `ahora` y `territorio` se
+ * inyectan para poder probarlo sin red.
  */
-export async function descargarEventos({ fetchImpl = fetch, ahora = new Date(), esperaMs = 5000, log = console.log } = {}) {
+export async function descargarEventos({
+  fetchImpl = fetch,
+  ahora = new Date(),
+  esperaMs = 5000,
+  log = console.log,
+  territorio = null,
+} = {}) {
+  const poligonos = territorio ?? (await leerTerritorio());
   const conteo = await obtenerJson(construirUrl("count", ahora), { fetchImpl, esperaMs });
   const aviso = comprobarLimite(conteo?.count);
   if (aviso) log(aviso);
@@ -154,7 +183,7 @@ export async function descargarEventos({ fetchImpl = fetch, ahora = new Date(), 
   }
 
   const fecha = fechaISO(ahora);
-  return {
+  const coleccion = {
     type: "FeatureCollection",
     metadata: {
       ...usgs.metadata,
@@ -165,6 +194,7 @@ export async function descargarEventos({ fetchImpl = fetch, ahora = new Date(), 
     ...(usgs.bbox ? { bbox: usgs.bbox } : {}),
     features: usgs.features.map((f) => aplicarContrato(f, fecha)),
   };
+  return etiquetarColeccion(coleccion, poligonos);
 }
 
 /** Cambios frente al catalogo anterior, por id del USGS. */
@@ -182,6 +212,18 @@ export function resumirCambios(anterior, nueva) {
   let retirados = 0;
   for (const id of previos.keys()) if (!actuales.has(id)) retirados += 1;
   return { nuevos, actualizados, retirados };
+}
+
+/** "N en Venezuela, M en la zona en disputa, K fuera (mar o paises vecinos)". */
+export function resumirEtiquetas(coleccion) {
+  let ven = 0;
+  let disputa = 0;
+  for (const f of coleccion.features) {
+    if (f.properties.en_venezuela) ven += 1;
+    if (f.properties.zona_disputada) disputa += 1;
+  }
+  const fuera = coleccion.features.length - ven - disputa;
+  return `${ven} en Venezuela, ${disputa} en la zona en disputa, ${fuera} fuera (mar o paises vecinos)`;
 }
 
 /** JSON valido con un evento por linea: diffs diarios legibles en Git. */
@@ -202,9 +244,10 @@ async function leerAnterior(ruta) {
 
 async function main() {
   const ahora = new Date();
-  const coleccion = await descargarEventos({ ahora });
+  const territorio = await leerTerritorio();
+  const coleccion = await descargarEventos({ ahora, territorio });
 
-  const { errores } = validarColeccion(coleccion, { ahora: ahora.getTime() });
+  const { errores } = validarColeccion(coleccion, { ahora: ahora.getTime(), territorio });
   if (errores.length > 0) {
     for (const e of errores.slice(0, 50)) console.log(`  ERROR  ${e}`);
     console.log(`${errores.length} errores de contrato: NO se escribe ${RUTA_EVENTOS}.`);
@@ -227,6 +270,7 @@ async function main() {
     `- Eventos: ${coleccion.features.length}`,
     `- Rango (UTC): ${new Date(Math.min(...tiempos)).toISOString()} a ${new Date(Math.max(...tiempos)).toISOString()}`,
     `- Confianza: ${Object.entries(confianzas).map(([k, v]) => `${k} ${v}`).join(", ")}`,
+    `- Territorio: ${resumirEtiquetas(coleccion)}`,
     `- Frente al archivo anterior: ${cambios.nuevos} nuevos, ${cambios.actualizados} revisados por el USGS, ${cambios.retirados} retirados`,
     "",
     "Validacion de contrato superada. Datos: U.S. Geological Survey (dominio publico).",

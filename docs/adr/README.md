@@ -15,6 +15,7 @@ no se reescribe el que ya existe. El historial es el valor.
 |---|---|---|
 | [ADR-001](ADR-001-leaflet.md) | Leaflet como motor de mapa | Aceptado (2026-10-20) |
 | [ADR-002](ADR-002-static-first.md) | Static-first: Action diaria en vez de consulta en vivo | Aceptado (2026-10-20) |
+| [ADR-003](ADR-003-region-rectangulo-etiqueta.md) | Region: rectangulo del USGS + etiqueta por poligono | Aceptada (2026-10-21) |
 
 ## Plantilla
 

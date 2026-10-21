@@ -91,10 +91,19 @@ sismos-ve **envuelve** el evento original sin reescribirlo, mapeando:
 | `confianza` | Derivado de `properties.status` del USGS: `"reviewed"` -> `alta`, `"automatic"` -> `media` | Es el campo mas cercano que el USGS publica a una senal de confianza. Queda **a verificar por Luis** si esta escala (alta/media/baja) es la correcta para sismologia — ver Fase 1 |
 | `ultima_verificacion` | Fecha (ISO 8601, solo fecha) en que la GitHub Action diaria corrio y escribio `eventos.json` | Distinta de `properties.updated` del USGS (cuando el USGS revisó el evento por ultima vez): una es "cuando nosotros lo bajamos", la otra "cuando el USGS lo toco" |
 
+Desde el gate de la Fase 1 (Luis, 2026-10-21, ADR-003) cada evento lleva
+ademas dos etiquetas de territorio, calculadas en la Action contra los
+poligonos versionados en `data/`:
+
+| Campo | De donde sale | Nota |
+|---|---|---|
+| `en_venezuela` | Punto en poligono contra la frontera **terrestre** de Venezuela con islas (`data/limites-venezuela.geojson`, geoBoundaries ADM0) | Booleano. Un epicentro en el mar queda en `false` (limite conocido) |
+| `zona_disputada` | Punto en poligono contra la zona en disputa de la Guayana Esequiba (`data/zona-disputada.geojson`, Natural Earth) | Booleano, excluyente con `en_venezuela`. Trato neutral: la clasificacion es de la fuente |
+
 **No se descarta ningun campo original del USGS** (`mag`, `place`, `time`,
 `depth`, `magType`, `url`, `title`, etc.): el contrato se anade, no reemplaza.
 El validador de la Fase 1 falla si un registro no tiene los tres campos del
-contrato ademas de magnitud y coordenadas.
+contrato y las dos etiquetas, ademas de magnitud y coordenadas.
 
 Esta propuesta queda para que Luis la apruebe o la ajuste en el gate de la
 Fase 0 antes de que la Fase 1 la implemente.
@@ -171,8 +180,10 @@ trabajo empieza leyendo el archivo de la fase activa.**
 - **No es alerta temprana.** Repetido a proposito: es el riesgo de mayor
   impacto si alguien malinterpreta el proyecto.
 - **USGS puede diferir de FUNVISIS** para el mismo evento venezolano.
-- El bounding box y los parametros de la consulta FDSN quedan **a verificar
-  por Luis** antes de cerrar la Fase 1 (ver `docs/fases/FASE-1-DATOS.md`).
+- El rectangulo de la consulta FDSN incluye paises vecinos y mar: la vista
+  por defecto filtra por `en_venezuela` (ADR-003), y los sismos en el mar
+  frente a la costa quedan fuera de esa vista hasta que exista una capa de
+  zona economica exclusiva (ver `docs/fases/FASE-1-DATOS.md`).
 
 ## Reglas duras heredadas del estandar del portafolio
 

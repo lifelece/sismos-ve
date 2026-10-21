@@ -13,10 +13,12 @@ import {
   confianzaDesdeStatus,
   construirUrl,
   descargarEventos,
+  etiquetarColeccion,
   resumirCambios,
   serializar,
 } from "../scripts/fetch-eventos.mjs";
 import { validarColeccion } from "../scripts/validate-eventos.mjs";
+import { leerTerritorio } from "../scripts/territorio.mjs";
 import { eventoUsgs } from "./fixtures.mjs";
 
 const AHORA = new Date("2026-10-20T06:17:42.123Z");
@@ -127,7 +129,30 @@ test("descargarEventos devuelve una coleccion que pasa el validador", async () =
   assert.equal(c.metadata.ultima_verificacion, "2026-10-20");
   assert.equal(c.metadata.fuente, FUENTE);
   assert.equal(c.features[0].properties.confianza, "alta");
-  assert.deepEqual(validarColeccion(c, { ahora: AHORA.getTime() }).errores, []);
+  assert.equal(c.features[0].properties.en_venezuela, false, "Cepita esta en Colombia");
+  assert.equal(c.features[0].properties.zona_disputada, false);
+  assert.match(c.metadata.etiquetas, /geoBoundaries/);
+  const territorio = await leerTerritorio();
+  assert.deepEqual(validarColeccion(c, { ahora: AHORA.getTime(), territorio }).errores, []);
+});
+
+test("etiquetarColeccion solo anade las etiquetas: el resto queda identico", async () => {
+  const territorio = await leerTerritorio();
+  const caracas = eventoUsgs();
+  caracas.id = "caracas-prueba";
+  caracas.geometry.coordinates = [-66.9036, 10.4806, 5];
+  const entrada = { type: "FeatureCollection", metadata: { url: "x" }, features: [eventoUsgs(), caracas] };
+  const copia = structuredClone(entrada);
+  const salida = etiquetarColeccion(entrada, territorio);
+  assert.deepEqual(entrada, copia, "no muta la entrada");
+  assert.deepEqual(salida.features.map((f) => f.properties.en_venezuela), [false, true]);
+  for (const [i, f] of salida.features.entries()) {
+    const { en_venezuela, zona_disputada, ...resto } = f.properties;
+    assert.deepEqual(resto, copia.features[i].properties);
+    assert.deepEqual(f.geometry, copia.features[i].geometry);
+  }
+  assert.equal(salida.metadata.url, "x");
+  assert.deepEqual(etiquetarColeccion(salida, territorio), salida, "idempotente");
 });
 
 test("descargarEventos no sigue si /count alcanza el limite (no trunca en silencio)", async () => {
@@ -175,4 +200,32 @@ test("resumirCambios cuenta nuevos, revisados por el USGS y retirados", () => {
   const c = { ...eventoUsgs(), id: "c" };
   assert.deepEqual(resumirCambios(anterior, { features: [aRevisado, c] }), { nuevos: 1, actualizados: 1, retirados: 1 });
   assert.deepEqual(resumirCambios(null, { features: [a] }), { nuevos: 1, actualizados: 0, retirados: 0 });
+});
+
+// --- Re-etiquetado sin red (scripts/etiquetar-eventos.mjs) ------------------
+
+test("el CLI de re-etiquetado reescribe el archivo con las etiquetas y valida", async () => {
+  const { mkdtemp, readFile, rm, writeFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { spawnSync } = await import("node:child_process");
+  const { fileURLToPath } = await import("node:url");
+  const script = fileURLToPath(new URL("../scripts/etiquetar-eventos.mjs", import.meta.url));
+  const dir = await mkdtemp(join(tmpdir(), "sismos-etiquetar-"));
+  try {
+    const caracas = aplicarContrato(eventoUsgs(), "2026-10-20");
+    caracas.id = "caracas-prueba";
+    caracas.geometry.coordinates = [-66.9036, 10.4806, 5];
+    const entrada = { type: "FeatureCollection", metadata: {}, features: [aplicarContrato(eventoUsgs(), "2026-10-20"), caracas] };
+    const ruta = join(dir, "eventos.json");
+    await writeFile(ruta, serializar(entrada));
+    const r = spawnSync(process.execPath, [script, ruta], { encoding: "utf8" });
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.match(r.stdout, /1 en Venezuela, 0 en la zona en disputa, 1 fuera/);
+    const salida = JSON.parse(await readFile(ruta, "utf8"));
+    assert.deepEqual(salida.features.map((f) => f.properties.en_venezuela), [false, true]);
+    assert.equal(salida.features[0].properties.ultima_verificacion, "2026-10-20", "no cambia la fecha de verificacion");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
