@@ -42,8 +42,8 @@ export const MAGNITUD_MINIMA = 3;
 /** Procedencia de las etiquetas de territorio, para metadata (ADR-003). */
 export const FUENTE_ETIQUETAS =
   "en_venezuela: geoBoundaries gbOpen VEN ADM0 (Natural Earth), dominio publico; " +
-  "zona_disputada: Natural Earth ne_10m_admin_0_disputed_areas, dominio publico. " +
-  "Poligonos terrestres: un epicentro en el mar queda en false.";
+  "zona_disputada: Natural Earth ne_10m_admin_0_disputed_areas, dominio publico; " +
+  "frente_costa: fuera de tierra venezolana y a <= 50 km de su costa (misma fuente).";
 
 /** Maximo de resultados por consulta que admite el servicio FDSN del USGS. */
 export const LIMITE_FDSN = 20000;
@@ -218,12 +218,14 @@ export function resumirCambios(anterior, nueva) {
 export function resumirEtiquetas(coleccion) {
   let ven = 0;
   let disputa = 0;
+  let costa = 0;
   for (const f of coleccion.features) {
     if (f.properties.en_venezuela) ven += 1;
     if (f.properties.zona_disputada) disputa += 1;
+    if (f.properties.frente_costa) costa += 1;
   }
-  const fuera = coleccion.features.length - ven - disputa;
-  return `${ven} en Venezuela, ${disputa} en la zona en disputa, ${fuera} fuera (mar o paises vecinos)`;
+  const fuera = coleccion.features.length - ven - disputa - costa;
+  return `${ven} en Venezuela, ${costa} frente a la costa, ${disputa} en la zona en disputa, ${fuera} fuera`;
 }
 
 /** JSON valido con un evento por linea: diffs diarios legibles en Git. */

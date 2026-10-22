@@ -134,6 +134,79 @@ export function anillosDePais(coleccion, nivel) {
   return anillos;
 }
 
+/** Distancia maxima a la costa venezolana para `frente_costa` (decision de Luis, 2026-10-21). */
+export const DISTANCIA_COSTA_KM = 50;
+
+/**
+ * Anclas donde la costa de tierra firme toca la frontera terrestre: Castilletes
+ * (Guajira, frontera con Colombia) y Punta Playa (Atlantico, linea de facto con
+ * Guyana). Coordenadas aproximadas: solo sirven para elegir el vertice mas
+ * cercano del anillo de tierra firme (1,4 km y 19,7 km con los datos actuales).
+ */
+export const ANCLAS_COSTA = Object.freeze({ oeste: [-71.32, 11.84], este: [-59.8, 8.55] });
+
+const KM_POR_GRADO = 111.32;
+
+function verticeMasCercano(anillo, [lon, lat]) {
+  const k = Math.cos((lat * Math.PI) / 180);
+  let mejor = 0;
+  let dMin = Infinity;
+  anillo.forEach(([x, y], i) => {
+    const d = ((x - lon) * k) ** 2 + (y - lat) ** 2;
+    if (d < dMin) [dMin, mejor] = [d, i];
+  });
+  return mejor;
+}
+
+/**
+ * Lineas de costa de un MultiPolygon de pais: las islas enteras y, del anillo
+ * mas grande (tierra firme), el arco entre las dos anclas que pasa por el
+ * vertice mas al norte. El resto de ese anillo es frontera terrestre.
+ * @returns {Array<Array<[number, number]>>} polilineas
+ */
+export function lineasDeCosta(multipoligono, anclas = ANCLAS_COSTA) {
+  const exteriores = multipoligono.coordinates.map((p) => p[0]);
+  const firme = exteriores.reduce((a, b) => (b.length > a.length ? b : a));
+  const n = firme.length - 1; // el ultimo punto repite el primero
+  const a = verticeMasCercano(firme, anclas.oeste) % n;
+  const b = verticeMasCercano(firme, anclas.este) % n;
+  let norte = 0;
+  firme.forEach(([, y], i) => {
+    if (y > firme[norte][1]) norte = i;
+  });
+  const arco = (desde, hasta) => {
+    const puntos = [];
+    for (let i = desde; ; i = (i + 1) % n) {
+      puntos.push(firme[i]);
+      if (i === hasta) return puntos;
+    }
+  };
+  const ab = arco(a, b);
+  const costa = ab.includes(firme[norte % n]) ? ab : arco(b, a);
+  return [costa, ...exteriores.filter((r) => r !== firme)];
+}
+
+/** Distancia en km de un punto a una polilinea (proyeccion local, error < 1 % a 50 km). */
+export function distanciaKm([lon, lat], polilineas) {
+  const k = Math.cos((lat * Math.PI) / 180) * KM_POR_GRADO;
+  let dMin = Infinity;
+  for (const linea of polilineas) {
+    for (let i = 1; i < linea.length; i += 1) {
+      const ax = (linea[i - 1][0] - lon) * k;
+      const ay = (linea[i - 1][1] - lat) * KM_POR_GRADO;
+      const bx = (linea[i][0] - lon) * k;
+      const by = (linea[i][1] - lat) * KM_POR_GRADO;
+      const dx = bx - ax;
+      const dy = by - ay;
+      const largo2 = dx * dx + dy * dy;
+      const t = largo2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / largo2)) : 0;
+      const d = Math.hypot(ax + t * dx, ay + t * dy);
+      if (d < dMin) dMin = d;
+    }
+  }
+  return dMin;
+}
+
 /** Geometria MultiPolygon con la caja precalculada para descartar rapido. */
 function multipoligono(anillos) {
   const coordinates = poligonosDesdeAnillos(anillos);
@@ -145,9 +218,14 @@ function multipoligono(anillos) {
  * @returns {{ venezuela: object, disputa: object }} dos MultiPolygon
  */
 export function cargarTerritorio({ limites, disputa }) {
+  const venezuela = multipoligono(anillosDePais(limites, "pais"));
+  const costa = lineasDeCosta(venezuela);
+  const margen = DISTANCIA_COSTA_KM / KM_POR_GRADO / Math.cos((13 * Math.PI) / 180);
+  const [x0, y0, x1, y1] = caja(costa.flat());
   return {
-    venezuela: multipoligono(anillosDePais(limites, "pais")),
+    venezuela,
     disputa: multipoligono(anillosDePais(disputa, "disputa")),
+    costa: { lineas: costa, caja: [x0 - margen, y0 - margen, x1 + margen, y1 + margen] },
   };
 }
 
@@ -159,6 +237,13 @@ export async function leerTerritorio({ rutaLimites = RUTA_LIMITES, rutaDisputa =
   return cargarTerritorio({ limites, disputa });
 }
 
+function cercaDeCosta(punto, costa) {
+  const [x0, y0, x1, y1] = costa.caja;
+  const [x, y] = punto;
+  if (x < x0 || x > x1 || y < y0 || y > y1) return false;
+  return distanciaKm(punto, costa.lineas) <= DISTANCIA_COSTA_KM;
+}
+
 function dentro(punto, geometria) {
   const [x0, y0, x1, y1] = geometria.caja;
   const [x, y] = punto;
@@ -167,7 +252,10 @@ function dentro(punto, geometria) {
 }
 
 /**
- * Etiquetas de un punto [lon, lat].
+ * Etiquetas de un punto [lon, lat]. Excluyentes: como mucho una es true.
+ * `frente_costa`: fuera de la tierra de Venezuela y de la zona en disputa, a
+ * <= 50 km de la costa venezolana. No distingue el mar de la tierra de otros
+ * paises (Trinidad, islas ABC, Guajira colombiana): no hay poligonos de ellos.
  *
  * Las dos fuentes trazan la frontera de facto con vertices distintos
  * (geoBoundaries simplificado a ~440 m frente a Natural Earth), asi que hay
@@ -177,10 +265,8 @@ function dentro(punto, geometria) {
  */
 export function etiquetasDe(punto, territorio) {
   const zona_disputada = dentro(punto, territorio.disputa);
-  return {
-    en_venezuela: !zona_disputada && dentro(punto, territorio.venezuela),
-    zona_disputada,
-  };
+  const en_venezuela = !zona_disputada && dentro(punto, territorio.venezuela);
+  return { en_venezuela, zona_disputada, frente_costa: !zona_disputada && !en_venezuela && cercaDeCosta(punto, territorio.costa) };
 }
 
 /** Devuelve una copia del evento con las dos etiquetas. No muta la entrada. */

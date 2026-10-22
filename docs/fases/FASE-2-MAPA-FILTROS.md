@@ -88,19 +88,18 @@ Verificado por Luis en telefono real, con datos moviles y DevTools cerrado.
   profundidad, territorio, confianza, enlace al USGS). La ficha completa es de
   la Fase 3.
 
-## Decisiones abiertas para Luis
+## Decisiones de Luis (2026-10-21)
 
-1. **Proveedor de teselas** (ADR-008): sin teselas (entregado), OSM, o un
-   proveedor con estilo oscuro.
-2. **Paleta de profundidad** (amarillo / celeste / azul Okabe-Ito) y estilo de
-   la zona en disputa (gris discontinuo): esteticas.
-3. **Eventos de la zona en disputa en la vista "Solo Venezuela":** hoy no
-   salen (lectura literal de "solo Venezuela"); salen en "Region" con su
-   etiqueta. Alternativa: mostrarlos tambien en la vista por defecto,
-   etiquetados.
-4. **Sismos en el mar** (925 con "Venezuela" en el texto del USGS no salen en
-   la vista por defecto): capa ZEE o franja costera (`FASE-1-DATOS.md`).
-5. **Umbrales del chip de frescura:** 2 y 7 dias (ADR-005).
-6. **Aceptar o no** los ADR 004-008 (Propuestos).
-7. **URL del repositorio** para enlazar el `DISCLAIMER.md` completo (hoy el
-   aviso se resume en un dialogo; `ENLACES.repo = null`).
+1. **Franja costera** (ADR-009): los eventos a <= 50 km de la costa que no
+   estan en tierra venezolana llevan `frente_costa: true` y se muestran por
+   defecto con esa etiqueta. Resultado: 645 en tierra, 1095 frente a la costa,
+   6 en la zona en disputa, 4358 en la region. Limite: 225 de los 1095 estan
+   bajo Trinidad (sin poligonos de paises vecinos).
+2. **Zona en disputa en "Solo Venezuela"**, etiquetada "zona en disputa"
+   (precedente P-4 de trato neutral).
+3. **Sin teselas**: ADR-008 aceptado.
+4. **Estetica aprobada**: ADR-004 a ADR-007 aceptados, paleta de profundidad y
+   estilo de la zona en disputa incluidos; umbrales del chip 2/7 dias.
+5. Sigue pendiente la URL publica del repositorio para enlazar el
+   `DISCLAIMER.md` completo (`ENLACES.repo`); el remoto existe pero es
+   privado.

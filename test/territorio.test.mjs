@@ -16,6 +16,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   anillosDePais,
+  distanciaKm,
   cargarTerritorio,
   etiquetarTerritorio,
   leerTerritorio,
@@ -168,13 +169,14 @@ const real = await leerTerritorio();
 /** [lon, lat] -> { en_venezuela, zona_disputada } con los poligonos reales. */
 function etiquetas(lon, lat) {
   const f = { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [lon, lat, 10] } };
-  const { en_venezuela, zona_disputada } = etiquetarTerritorio(f, real).properties;
-  return { en_venezuela, zona_disputada };
+  const { en_venezuela, zona_disputada, frente_costa } = etiquetarTerritorio(f, real).properties;
+  return { en_venezuela, zona_disputada, frente_costa };
 }
 
-const VEN = { en_venezuela: true, zona_disputada: false };
-const FUERA = { en_venezuela: false, zona_disputada: false };
-const DISPUTA = { en_venezuela: false, zona_disputada: true };
+const VEN = { en_venezuela: true, zona_disputada: false, frente_costa: false };
+const FUERA = { en_venezuela: false, zona_disputada: false, frente_costa: false };
+const DISPUTA = { en_venezuela: false, zona_disputada: true, frente_costa: false };
+const COSTA = { en_venezuela: false, zona_disputada: false, frente_costa: true };
 
 test("los poligonos reales se cargan: Venezuela con islas y una zona en disputa", () => {
   assert.equal(real.venezuela.type, "MultiPolygon");
@@ -188,17 +190,44 @@ test("tierra firme: Caracas y San Cristobal", () => {
   assert.deepEqual(etiquetas(-72.225, 7.7669), VEN, "San Cristobal");
 });
 
-test("costa: tierra a un lado, mar al otro (el mar queda en false)", () => {
+test("costa: tierra a un lado, mar al otro (el mar cercano es frente_costa)", () => {
   assert.deepEqual(etiquetas(-66.9, 10.55), VEN, "cerro El Avila, sobre La Guaira");
-  assert.deepEqual(etiquetas(-66.9, 10.66), FUERA, "mar Caribe frente a La Guaira");
+  assert.deepEqual(etiquetas(-66.9, 10.66), COSTA, "mar Caribe frente a La Guaira");
   assert.deepEqual(etiquetas(-68.01, 10.44), VEN, "Puerto Cabello, tierra");
-  assert.deepEqual(etiquetas(-68.01, 10.56), FUERA, "Puerto Cabello, mar");
+  assert.deepEqual(etiquetas(-68.01, 10.56), COSTA, "Puerto Cabello, mar");
+});
+
+test("franja costera de 50 km: dentro y fuera", () => {
+  assert.deepEqual(etiquetas(-66.9, 10.95), COSTA, "~35 km al norte de La Guaira");
+  assert.deepEqual(etiquetas(-66.9, 11.3), FUERA, "~70 km al norte de La Guaira");
+  assert.deepEqual(etiquetas(-66.0, 12.9), FUERA, "~120 km al norte de La Orchila");
+});
+
+test("la frontera terrestre no es costa: Colombia y Brasil cerca de la linea quedan fuera", () => {
+  assert.deepEqual(etiquetas(-72.5078, 7.8939), FUERA, "Cucuta, a ~5 km de la frontera");
+  assert.deepEqual(etiquetas(-60.67, 2.82), FUERA, "Boa Vista");
+});
+
+test("limite conocido: tierra de otro pais cerca de la costa cuenta como frente_costa", () => {
+  assert.deepEqual(etiquetas(-61.51, 10.66), COSTA, "Puerto Espana, Trinidad (~40 km de Paria)");
+});
+
+test("distanciaKm: medio grado al norte de una linea en lat 10 son ~55 km", () => {
+  const d = distanciaKm([-66, 10.5], [[[-67, 10], [-65, 10]]]);
+  assert.ok(Math.abs(d - 55.66) < 0.5, `${d}`);
+});
+
+test("lineasDeCosta: el arco de tierra firme pasa por el norte y las islas van enteras", () => {
+  const lineas = real.costa.lineas;
+  assert.equal(lineas.length, real.venezuela.coordinates.length);
+  assert.ok(lineas[0].some(([, y]) => y > 12.19), "incluye Paraguana");
+  assert.ok(!lineas[0].some(([, y]) => y < 7), "no incluye la frontera sur");
 });
 
 test("islas: Margarita y La Tortuga cuentan; el mar entre islas no", () => {
   assert.deepEqual(etiquetas(-63.86, 11.03), VEN, "La Asuncion, Margarita");
   assert.deepEqual(etiquetas(-65.32, 10.93), VEN, "La Tortuga");
-  assert.deepEqual(etiquetas(-64.5, 10.75), FUERA, "mar entre Araya y Margarita");
+  assert.deepEqual(etiquetas(-64.5, 10.75), COSTA, "mar entre Araya y Margarita");
 });
 
 test("Guayana Esequiba: zona_disputada true y en_venezuela false", () => {
@@ -210,7 +239,6 @@ test("Guayana Esequiba: zona_disputada true y en_venezuela false", () => {
 test("Colombia, Trinidad y Brasil quedan fuera", () => {
   assert.deepEqual(etiquetas(-73.0065, 6.7888), FUERA, "evento real us6000u25i, Cepita");
   assert.deepEqual(etiquetas(-72.5078, 7.8939), FUERA, "Cucuta");
-  assert.deepEqual(etiquetas(-61.51, 10.66), FUERA, "Puerto Espana, Trinidad");
   assert.deepEqual(etiquetas(-60.67, 2.82), FUERA, "Boa Vista, Brasil");
   assert.deepEqual(etiquetas(-61.11, 4.6), VEN, "Santa Elena de Uairen, al otro lado");
 });
@@ -218,7 +246,7 @@ test("Colombia, Trinidad y Brasil quedan fuera", () => {
 test("eventos reales del cotejo del gate", () => {
   assert.deepEqual(etiquetas(-68.5564, 10.3713), VEN, "us6000t7zc, 20 km E of San Felipe");
   assert.deepEqual(etiquetas(-63.486, 10.598), VEN, "usp00084m2, 26 km WSW of Carupano");
-  assert.deepEqual(etiquetas(-62.9019, 10.7731), FUERA, "us1000gez7, 40 km ENE of Carupano (en el mar)");
+  assert.deepEqual(etiquetas(-62.9019, 10.7731), COSTA, "us1000gez7, 40 km ENE of Carupano (en el mar)");
   assert.deepEqual(etiquetas(-60.892, 11.112), FUERA, "usp000810j, Tobago");
 });
 
@@ -234,7 +262,7 @@ test("ningun punto real lleva a la vez en_venezuela y zona_disputada", () => {
   for (let lat = 4.0; lat <= 8.6; lat += 0.02) {
     for (let lon = -61.6; lon <= -59.6; lon += 0.02) {
       const e = etiquetas(lon, lat);
-      assert.ok(!(e.en_venezuela && e.zona_disputada), `doble etiqueta en ${lon.toFixed(2)}, ${lat.toFixed(2)}`);
+      assert.ok(Object.values(e).filter(Boolean).length <= 1, `doble etiqueta en ${lon.toFixed(2)}, ${lat.toFixed(2)}`);
     }
   }
 });

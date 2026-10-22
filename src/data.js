@@ -22,6 +22,7 @@ import { ANIO_INICIO, MAGNITUD_MINIMA, PROFUNDIDAD, RADIO, VISTA_INICIAL } from 
  * @property {string} confianza  alta | media
  * @property {boolean} enVenezuela
  * @property {boolean} zonaDisputada
+ * @property {boolean} frenteCosta  a <= 50 km de la costa, fuera de tierra venezolana
  */
 
 /** @returns {Evento} */
@@ -42,6 +43,7 @@ export function normalizarEvento(feature) {
     confianza: p.confianza,
     enVenezuela: p.en_venezuela === true,
     zonaDisputada: p.zona_disputada === true,
+    frenteCosta: p.frente_costa === true,
   };
 }
 
@@ -79,11 +81,18 @@ export function radioPorMagnitud(mag) {
   return Math.min(RADIO.max, Math.max(RADIO.min, r));
 }
 
-/** "venezuela" | "disputa" | "fuera" (mar o paises vecinos). */
+/** "venezuela" | "costa" | "disputa" | "fuera" (resto de la region). */
 export function territorioDe(evento) {
   if (evento.zonaDisputada) return "disputa";
+  if (evento.frenteCosta) return "costa";
   return evento.enVenezuela ? "venezuela" : "fuera";
 }
+
+/**
+ * Entra en la vista "Solo Venezuela": tierra, franja costera de 50 km y zona en
+ * disputa, cada uno con su etiqueta (decisiones de Luis del 2026-10-21, ADR-009).
+ */
+export const enVistaVenezuela = (e) => e.enVenezuela || e.frenteCosta || e.zonaDisputada;
 
 /**
  * @typedef {{ vista: "venezuela"|"region", desde: number, hasta: number, magMin: number }} Filtro
@@ -98,7 +107,7 @@ export function filtroInicial(coleccion) {
 export function filtrarEventos(eventos, filtro) {
   const { vista, desde, hasta, magMin } = filtro;
   return eventos.filter(
-    (e) => (vista === "region" || e.enVenezuela) && e.anio >= desde && e.anio <= hasta && e.mag >= magMin
+    (e) => (vista === "region" || enVistaVenezuela(e)) && e.anio >= desde && e.anio <= hasta && e.mag >= magMin
   );
 }
 
@@ -110,7 +119,7 @@ export function filtrarEventos(eventos, filtro) {
 export function ampliarFiltroPara(filtro, evento) {
   if (filtrarEventos([evento], filtro).length === 1) return filtro;
   return {
-    vista: filtro.vista === "region" || evento.enVenezuela ? filtro.vista : "region",
+    vista: filtro.vista === "region" || enVistaVenezuela(evento) ? filtro.vista : "region",
     desde: Math.min(filtro.desde, evento.anio),
     hasta: Math.max(filtro.hasta, evento.anio),
     magMin: Math.min(filtro.magMin, Math.floor(evento.mag * 10 + 1e-9) / 10),

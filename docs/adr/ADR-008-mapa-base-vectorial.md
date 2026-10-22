@@ -1,6 +1,6 @@
 # ADR-008 — Mapa base vectorial propio mientras se decide el proveedor de teselas
 
-**Fecha:** 2026-10-21 · **Estado:** Propuesto — **decision de Luis pendiente**
+**Fecha:** 2026-10-21 · **Estado:** Aceptada (Luis, 2026-10-21): **sin teselas**
 
 ## Contexto
 
@@ -9,9 +9,9 @@ recomendacion no vinculante era `tile.openstreetmap.org` cumpliendo su
 politica, pero ese uso no esta aprobado: no se usa ningun servidor de teselas
 de terceros sin permiso de Luis.
 
-## Decision (provisional)
+## Decision
 
-La Fase 2 se entrega **sin teselas**. El mapa base son los propios GeoJSON de
+Luis decide **sin teselas** (opcion A). El mapa base son los propios GeoJSON de
 `data/` dibujados por Leaflet sobre el fondo `shell`: frontera nacional,
 limites estatales y la zona en disputa (trazo discontinuo, con su leyenda), y
 el rectangulo de la consulta en la vista "Region". `src/config.js` deja un

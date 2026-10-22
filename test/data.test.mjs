@@ -42,6 +42,7 @@ test("normalizarEvento conserva lo que la interfaz necesita, con nombres propios
     confianza: "alta",
     enVenezuela: false,
     zonaDisputada: false,
+    frenteCosta: false,
   });
 });
 
@@ -91,9 +92,10 @@ test("radio por magnitud: crece con la magnitud, comprimido y acotado", () => {
   assert.equal(radioPorMagnitud(2), RADIO.min, "por debajo de M3 no encoge");
 });
 
-test("territorioDe: venezuela, disputa o fuera", () => {
+test("territorioDe: venezuela, costa, disputa o fuera", () => {
   const e = normalizarEvento(eventoValido());
   assert.equal(territorioDe(e), "fuera");
+  assert.equal(territorioDe({ ...e, frenteCosta: true }), "costa");
   assert.equal(territorioDe({ ...e, enVenezuela: true }), "venezuela");
   assert.equal(territorioDe({ ...e, zonaDisputada: true }), "disputa");
 });
@@ -103,12 +105,13 @@ test("filtroInicial: vista Venezuela, todo el rango de años, M minima del catal
   assert.deepEqual(filtroInicial(c), { vista: "venezuela", desde: 1990, hasta: c.anioMax, magMin: 3 });
 });
 
-test("filtrarEventos: vista Venezuela = solo en_venezuela (decision de Luis)", () => {
+test("filtrarEventos: vista Venezuela = tierra + franja costera + zona en disputa (ADR-009)", () => {
   const c = normalizarColeccion(catalogo);
   const f = filtroInicial(c);
   const ven = filtrarEventos(c.eventos, f);
-  assert.equal(ven.length, catalogo.features.filter((x) => x.properties.en_venezuela).length);
-  assert.ok(ven.every((e) => e.enVenezuela));
+  const p = (x) => x.properties;
+  assert.equal(ven.length, catalogo.features.filter((x) => p(x).en_venezuela || p(x).frente_costa || p(x).zona_disputada).length);
+  assert.ok(ven.some((e) => e.frenteCosta) && ven.some((e) => e.zonaDisputada));
   const region = filtrarEventos(c.eventos, { ...f, vista: "region" });
   assert.equal(region.length, c.eventos.length);
 });

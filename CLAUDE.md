@@ -99,11 +99,12 @@ poligonos versionados en `data/`:
 |---|---|---|
 | `en_venezuela` | Punto en poligono contra la frontera **terrestre** de Venezuela con islas (`data/limites-venezuela.geojson`, geoBoundaries ADM0) | Booleano. Un epicentro en el mar queda en `false` (limite conocido) |
 | `zona_disputada` | Punto en poligono contra la zona en disputa de la Guayana Esequiba (`data/zona-disputada.geojson`, Natural Earth) | Booleano, excluyente con `en_venezuela`. Trato neutral: la clasificacion es de la fuente |
+| `frente_costa` | Fuera de tierra venezolana y de la zona en disputa, a <= 50 km de la costa (ADR-009) | Booleano, excluyente. No distingue el mar de la tierra de paises vecinos (limite conocido) |
 
 **No se descarta ningun campo original del USGS** (`mag`, `place`, `time`,
 `depth`, `magType`, `url`, `title`, etc.): el contrato se anade, no reemplaza.
 El validador de la Fase 1 falla si un registro no tiene los tres campos del
-contrato y las dos etiquetas, ademas de magnitud y coordenadas.
+contrato y las tres etiquetas, ademas de magnitud y coordenadas.
 
 Esta propuesta queda para que Luis la apruebe o la ajuste en el gate de la
 Fase 0 antes de que la Fase 1 la implemente.

@@ -109,7 +109,9 @@ test("faltan en_venezuela o zona_disputada, o no son booleanos", () => {
 
 test("un evento no puede estar a la vez en Venezuela y en la zona en disputa", () => {
   const doble = evento({ props: { en_venezuela: true, zona_disputada: true } });
-  assert.match(erroresDe(doble).join(), /las dos etiquetas/);
+  assert.match(erroresDe(doble).join(), /mas de una etiqueta/);
+  assert.match(erroresDe(evento({ props: { en_venezuela: true, frente_costa: true } })).join(), /mas de una etiqueta/);
+  assert.match(erroresDe(evento({ props: { frente_costa: undefined } })).join(), /sin frente_costa/);
 });
 
 test("con el territorio, una etiqueta que no coincide con el poligono tumba el registro", async () => {

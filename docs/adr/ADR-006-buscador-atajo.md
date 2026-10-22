@@ -1,6 +1,6 @@
 # ADR-006 — Buscador de eventos con atajo "/"
 
-**Fecha:** 2026-10-21 · **Estado:** Propuesto (se acepta en el STOP gate de la
+**Fecha:** 2026-10-21 · **Estado:** Aceptada (Luis, 2026-10-21; estetica aprobada en el gate de la
 Fase 2)
 
 ## Contexto

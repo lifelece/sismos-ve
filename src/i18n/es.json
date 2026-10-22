@@ -21,7 +21,7 @@
   "filtros.vista": "Zona",
   "filtros.vista.venezuela": "Solo Venezuela",
   "filtros.vista.region": "Región",
-  "filtros.notaVenezuela": "Epicentros en tierra firme e islas de Venezuela. Los del mar frente a la costa no cuentan (límite conocido); la zona en disputa va aparte.",
+  "filtros.notaVenezuela": "Tierra firme e islas, sismos a 50 km o menos de la costa y la zona en disputa, cada uno con su etiqueta.",
   "filtros.notaRegion": "Todo el rectángulo de la consulta al USGS: incluye países vecinos y el mar.",
   "filtros.tiempo": "Tiempo",
   "filtros.desde": "Desde",
@@ -58,7 +58,7 @@
   "aviso.noAlerta": "Este panel es educativo y de divulgación. No es un sistema de alerta temprana: no detecta sismos en curso, no envía avisos ni predice sismos, y no debe usarse para decisiones de seguridad, evacuación ni emergencias. Si sientes un sismo, sigue los protocolos oficiales de tu localidad.",
   "aviso.funvisis": "Los datos son del catálogo global del USGS. La red de referencia en Venezuela es FUNVISIS, y puede dar otra magnitud, epicentro o profundidad para el mismo evento. Aquí solo se muestra la versión del USGS, sin promediar ni corregir.",
   "aviso.desfase": "El catálogo se actualiza una vez al día: un evento puede tardar 24 horas o más en aparecer, y el USGS puede revisar eventos después.",
-  "aviso.territorio": "«Solo Venezuela» usa el polígono terrestre con islas de geoBoundaries; la zona en disputa de la Guayana Esequiba se marca aparte, con la clasificación de Natural Earth. El proyecto no toma posición política.",
+  "aviso.territorio": "«Solo Venezuela» incluye el polígono terrestre con islas de geoBoundaries, una franja de 50 km frente a su costa (que no distingue el mar de la tierra de países vecinos como Trinidad) y la zona en disputa de la Guayana Esequiba, etiquetada aparte con la clasificación de Natural Earth. El proyecto no toma posición política.",
   "aviso.completo": "Texto completo del aviso (DISCLAIMER.md)",
   "aviso.cerrar": "Entendido",
   "evento.fecha": "Fecha",
@@ -69,7 +69,7 @@
   "evento.usgs": "Ver la ficha en el USGS",
   "territorio.venezuela": "Venezuela",
   "territorio.disputa": "Zona en disputa (Guayana Esequiba)",
-  "territorio.fuera": "Fuera de Venezuela (mar o país vecino)",
+  "territorio.fuera": "Fuera de Venezuela (resto de la región)",
   "confianza.alta": "alta (revisado por el USGS)",
   "confianza.media": "media (automático del USGS)",
   "confianza.baja": "baja",
@@ -79,5 +79,6 @@
   "tabla.prof": "Prof. km",
   "tabla.lugar": "Lugar (texto del USGS)",
   "tabla.verEnMapa": "Ver en el mapa",
-  "tabla.mas": "Mostrar {n} más"
+  "tabla.mas": "Mostrar {n} más",
+  "territorio.costa": "Frente a la costa de Venezuela (a 50 km o menos)"
 }

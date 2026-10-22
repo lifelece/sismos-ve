@@ -12,8 +12,8 @@
  *     [lon, lat, profundidad_km];
  *   - cae fuera de la region de la consulta o de la ventana temporal del
  *     catalogo;
- *   - no trae las etiquetas de territorio `en_venezuela` y `zona_disputada`
- *     (booleanos, nunca las dos en true) o, desde el CLI, si no coinciden con
+ *   - no trae las etiquetas de territorio `en_venezuela`, `zona_disputada` y
+ *     `frente_costa` (booleanos, como mucho una en true) o, desde el CLI, si no coinciden con
  *     los poligonos de data/ (ADR-003).
  *
  * Sin dependencias: solo modulos nativos de Node. El contrato es el nucleo
@@ -53,7 +53,7 @@ export const INICIO_CATALOGO = "1990-01-01";
 export const CONFIANZAS = Object.freeze(["alta", "media", "baja"]);
 
 /** Etiquetas de territorio obligatorias (booleanos, ADR-003). */
-export const ETIQUETAS = Object.freeze(["en_venezuela", "zona_disputada"]);
+export const ETIQUETAS = Object.freeze(["en_venezuela", "zona_disputada", "frente_costa"]);
 
 /** Holgura para relojes desfasados: un evento no puede venir del futuro. */
 const HOLGURA_FUTURO_MS = 24 * 60 * 60 * 1000;
@@ -126,8 +126,8 @@ export function validarEvento(feature, { ahora = Date.now(), territorio = null }
       etiquetasBien = false;
     }
   }
-  if (p.en_venezuela === true && p.zona_disputada === true) {
-    errores.push("lleva las dos etiquetas en true (en_venezuela y zona_disputada son excluyentes)");
+  if (ETIQUETAS.filter((clave) => p[clave] === true).length > 1) {
+    errores.push(`lleva mas de una etiqueta de territorio en true (${ETIQUETAS.join(", ")} son excluyentes)`);
     etiquetasBien = false;
   }
 

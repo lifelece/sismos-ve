@@ -55,5 +55,6 @@ export function eventoValido() {
   f.properties.ultima_verificacion = "2026-10-20";
   f.properties.en_venezuela = false;
   f.properties.zona_disputada = false;
+  f.properties.frente_costa = false;
   return f;
 }

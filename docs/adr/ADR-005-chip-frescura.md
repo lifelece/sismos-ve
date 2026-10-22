@@ -1,6 +1,6 @@
 # ADR-005 — Chip de frescura del catalogo
 
-**Fecha:** 2026-10-21 · **Estado:** Propuesto (se acepta en el STOP gate de la
+**Fecha:** 2026-10-21 · **Estado:** Aceptada (Luis, 2026-10-21; estetica aprobada en el gate de la
 Fase 2)
 
 ## Contexto
@@ -25,7 +25,7 @@ El pie del panel muestra un chip con la edad de
 Umbrales en `src/config.js` (`FRESCURA`), con este porque: la Action corre a
 diario, asi que mas de 2 dias significa que se perdio al menos un ciclo (o un
 PR sin mergear); una semana sin datos nuevos ya no es "el catalogo de hoy".
-**Los umbrales son una propuesta para Luis**, no una cifra de la fuente.
+**Umbrales aceptados por Luis el 2026-10-21**; no son una cifra de la fuente.
 
 ## Trasplante JARVIS
 

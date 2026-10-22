@@ -21,7 +21,7 @@
   "filtros.vista": "Area",
   "filtros.vista.venezuela": "Venezuela only",
   "filtros.vista.region": "Region",
-  "filtros.notaVenezuela": "Epicenters on the Venezuelan mainland and islands. Offshore ones do not count (known limitation); the disputed zone is marked separately.",
+  "filtros.notaVenezuela": "Mainland and islands, earthquakes 50 km or less off the coast, and the disputed zone, each with its label.",
   "filtros.notaRegion": "The whole rectangle queried from the USGS: includes neighboring countries and the sea.",
   "filtros.tiempo": "Time",
   "filtros.desde": "From",
@@ -58,7 +58,7 @@
   "aviso.noAlerta": "This dashboard is educational and informational. It is not an early-warning system: it does not detect earthquakes as they happen, send alerts or predict earthquakes, and must not be used for safety, evacuation or emergency decisions. If you feel an earthquake, follow your local official protocols.",
   "aviso.funvisis": "Data comes from the USGS global catalog. The reference network in Venezuela is FUNVISIS, which may report a different magnitude, epicenter or depth for the same event. Only the USGS version is shown here, not averaged or corrected.",
   "aviso.desfase": "The catalog is refreshed once a day: an event may take 24 hours or more to appear, and the USGS may revise events later.",
-  "aviso.territorio": "“Venezuela only” uses the geoBoundaries land polygon with islands; the disputed zone of Guayana Esequiba is marked separately, with Natural Earth's classification. The project takes no political position.",
+  "aviso.territorio": "“Venezuela only” includes the geoBoundaries land polygon with islands, a 50 km band off its coast (which does not tell the sea from neighboring land such as Trinidad) and the disputed zone of Guayana Esequiba, labeled separately with Natural Earth’s classification. The project takes no political position.",
   "aviso.completo": "Full notice (DISCLAIMER.md)",
   "aviso.cerrar": "Got it",
   "evento.fecha": "Date",
@@ -69,7 +69,7 @@
   "evento.usgs": "Open the USGS event page",
   "territorio.venezuela": "Venezuela",
   "territorio.disputa": "Disputed zone (Guayana Esequiba)",
-  "territorio.fuera": "Outside Venezuela (sea or neighboring country)",
+  "territorio.fuera": "Outside Venezuela (rest of the region)",
   "confianza.alta": "high (reviewed by the USGS)",
   "confianza.media": "medium (USGS automatic)",
   "confianza.baja": "low",
@@ -79,5 +79,6 @@
   "tabla.prof": "Depth km",
   "tabla.lugar": "Place (USGS text)",
   "tabla.verEnMapa": "Show on map",
-  "tabla.mas": "Show {n} more"
+  "tabla.mas": "Show {n} more",
+  "territorio.costa": "Off the Venezuelan coast (50 km or less)"
 }
