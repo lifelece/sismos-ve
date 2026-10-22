@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0f14" />
+    <meta name="color-scheme" content="dark" />
+    <title>Sismos VE</title>
+    <meta
+      name="description"
+      content="Panel de divulgacion con el catalogo publico de sismos del USGS sobre Venezuela. No es un sistema de alerta temprana."
+    />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <div
+      id="app"
+      class="grid h-dvh grid-rows-[auto_1fr_auto] sm:grid-cols-[21rem_1fr] sm:grid-rows-[auto_1fr]"
+    >
+      <header id="cabecera" class="border-b border-trazo bg-elev sm:col-span-2"></header>
+      <main id="vista" class="relative min-h-0 sm:col-start-2 sm:row-start-2">
+        <div id="mapa" role="region" class="absolute inset-0"></div>
+        <p
+          id="carga-mapa"
+          class="pointer-events-none absolute inset-x-0 top-1/2 text-center font-mono text-[0.75rem] text-lo"
+        ></p>
+        <section id="tabla" class="absolute inset-0 z-[1000] overflow-auto bg-shell" hidden></section>
+      </main>
+      <aside
+        id="panel"
+        class="min-h-0 border-t border-trazo bg-elev sm:col-start-1 sm:row-start-2 sm:overflow-y-auto sm:border-t-0 sm:border-r"
+      ></aside>
+    </div>
+    <dialog id="aviso" aria-labelledby="aviso-titulo"></dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

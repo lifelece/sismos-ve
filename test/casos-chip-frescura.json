@@ -1,0 +1,22 @@
+{
+  "$comment": "Casos de tabla de la spec del chip de frescura (SPEC.md R2-R4, R7). Neutros: fechas ficticias. 'edad' es entera hacia abajo en 'unidad'. 'estado' null = la función devuelve nulo.",
+  "escalas": {
+    "minutos": { "unidad": "min", "umbrales": { "atencion": 60, "vencida": 360 } },
+    "dias": { "unidad": "dia", "umbrales": { "atencion": 90, "vencida": 180 } }
+  },
+  "casos": [
+    { "id": "sin-marca", "escala": "minutos", "marca": null, "ahora": "2026-01-01T12:00:00.000Z", "estado": null },
+    { "id": "marca-vacia", "escala": "minutos", "marca": "", "ahora": "2026-01-01T12:00:00.000Z", "estado": null },
+    { "id": "marca-ilegible", "escala": "minutos", "marca": "no-es-fecha", "ahora": "2026-01-01T12:00:00.000Z", "estado": null },
+    { "id": "recien", "escala": "minutos", "marca": "2026-01-01T12:00:00.000Z", "ahora": "2026-01-01T12:00:00.000Z", "estado": "fresca", "edad": 0 },
+    { "id": "justo-en-atencion", "escala": "minutos", "marca": "2026-01-01T11:00:00.000Z", "ahora": "2026-01-01T12:00:00.000Z", "estado": "fresca", "edad": 60 },
+    { "id": "un-ms-pasado-atencion", "escala": "minutos", "marca": "2026-01-01T10:59:59.999Z", "ahora": "2026-01-01T12:00:00.000Z", "estado": "atencion", "edad": 60 },
+    { "id": "justo-en-vencida", "escala": "minutos", "marca": "2026-01-01T06:00:00.000Z", "ahora": "2026-01-01T12:00:00.000Z", "estado": "atencion", "edad": 360 },
+    { "id": "un-ms-pasado-vencida", "escala": "minutos", "marca": "2026-01-01T05:59:59.999Z", "ahora": "2026-01-01T12:00:00.000Z", "estado": "vencida", "edad": 360 },
+    { "id": "marca-en-el-futuro", "escala": "minutos", "marca": "2026-01-01T12:05:00.000Z", "ahora": "2026-01-01T12:00:00.000Z", "estado": "fresca", "edad": 0 },
+    { "id": "microsegundos", "escala": "minutos", "marca": "2026-01-01T11:48:00.123456+00:00", "ahora": "2026-01-01T12:00:00.123Z", "estado": "fresca", "edad": 12 },
+    { "id": "dias-en-aviso", "escala": "dias", "marca": "2026-01-01T00:00:00.000Z", "ahora": "2026-04-01T00:00:00.000Z", "estado": "fresca", "edad": 90 },
+    { "id": "dias-pasado-aviso", "escala": "dias", "marca": "2026-01-01T00:00:00.000Z", "ahora": "2026-04-02T00:00:00.000Z", "estado": "atencion", "edad": 91 },
+    { "id": "dias-pasado-caducado", "escala": "dias", "marca": "2026-01-01T00:00:00.000Z", "ahora": "2026-07-01T00:00:00.000Z", "estado": "vencida", "edad": 181 }
+  ]
+}
