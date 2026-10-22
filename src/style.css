@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+/*
+ * Tokens "instrumento tecnico oscuro" (ADR-004): nucleo neutral
+ * arsenal/tokens/orinoco-cuenca.json, origen orinoco-digital. Viven en @theme
+ * para que Tailwind genere bg-shell, text-hi, border-trazo...
+ * Los colores de DATOS (profundidad) no estan aqui: viven en config.js.
+ * tinta: solo texto, enlaces y foco. tinta-baja: solo lineas. Ninguno pinta datos.
+ */
+@theme {
+  --color-shell: #0b0f14;
+  --color-elev: #141a21;
+  --color-trazo: #1f2a35;
+  --color-hi: #e6edf3;
+  --color-lo: #8b98a5;
+  --color-tinta: #7fa3b5;
+  --color-tinta-baja: #3a5266;
+  --color-activo: #3fb950;
+  --color-alerta: #f85149;
+  /* Estado "atencion" del chip de frescura: el valor que el origen usaba para
+     ese mismo estado (ADR-004/ADR-005). */
+  --color-aviso: #f2a33c;
+
+  /* Sin fuentes web (ADR-004). */
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+
+  --dur-instante: 90ms;
+  --dur-rapido: 180ms;
+  --dur-medio: 260ms;
+  --ease-cuenca: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  --animate-indeterminada: barra-indeterminada 1.4s ease-in-out infinite;
+  @keyframes barra-indeterminada {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-shell);
+  color: var(--color-hi);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-tinta);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+dialog#aviso {
+  max-width: min(32rem, calc(100vw - 2rem));
+  border: 1px solid var(--color-trazo);
+  border-radius: 0.5rem;
+  background: var(--color-elev);
+  color: var(--color-hi);
+  padding: 0;
+}
+dialog#aviso::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+/* --- Leaflet armonizado con el shell. La atribucion se armoniza, nunca se
+   oculta (LICENSE-DATA: geoBoundaries CC BY 3.0 IGO). ------------------- */
+#mapa.leaflet-container {
+  background: var(--color-shell);
+  font-family: inherit;
+}
+#mapa .leaflet-control-attribution {
+  background: rgb(11 15 20 / 0.85);
+  color: var(--color-lo);
+  font-size: 10px;
+}
+#mapa .leaflet-control-attribution a {
+  color: var(--color-tinta);
+}
+#mapa .leaflet-bar a {
+  background: var(--color-elev);
+  color: var(--color-hi);
+  border-color: var(--color-trazo);
+}
+#mapa .leaflet-bar a:hover {
+  background: var(--color-trazo);
+}
+#mapa .leaflet-popup-content-wrapper,
+#mapa .leaflet-popup-tip {
+  background: var(--color-elev);
+  color: var(--color-hi);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.5);
+}
+#mapa .leaflet-popup-content-wrapper {
+  border: 1px solid var(--color-trazo);
+  border-radius: 0.5rem;
+}
+#mapa .leaflet-popup-content {
+  margin: 12px 14px;
+  line-height: 1.4;
+}
+#mapa .leaflet-popup-close-button {
+  color: var(--color-lo);
+}
+
+/* Preflight de Tailwind quita el margen del dialogo: se recentra. */
+dialog#aviso {
+  margin: auto;
+}

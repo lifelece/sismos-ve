@@ -1,0 +1,44 @@
+# Validador de datos en CI (Fase 1). Corre en cada push o PR que toque los
+# datos, los scripts que los producen o validan, o sus tests. Sale en rojo si
+# data/eventos.json no es JSON valido, no es una FeatureCollection, o algun
+# registro no trae el contrato (fuente, confianza, ultima_verificacion), la
+# magnitud, un Point [lon, lat, profundidad_km], cae fuera de la region, o sus
+# etiquetas en_venezuela / zona_disputada no coinciden con los poligonos de
+# data/ (ADR-003).
+#
+# Sin `npm install`: el validador y los tests solo usan modulos nativos de Node.
+name: validar-datos
+
+on:
+  push:
+    paths:
+      - "data/**"
+      - "scripts/**"
+      - "test/**"
+      - "package.json"
+      - ".github/workflows/validar-datos.yml"
+  pull_request:
+    paths:
+      - "data/**"
+      - "scripts/**"
+      - "test/**"
+      - "package.json"
+      - ".github/workflows/validar-datos.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validar data/eventos.json (contrato, region, JSON)
+        run: node scripts/validate-eventos.mjs
+      - name: Tests (validador y mapeo FDSN -> contrato)
+        run: npm test

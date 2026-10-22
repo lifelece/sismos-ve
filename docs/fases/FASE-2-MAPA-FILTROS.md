@@ -4,7 +4,8 @@
 > **Gate de salida:** verificado en telefono real, datos moviles, DevTools
 > cerrado.
 
-**Tiempo estimado:** 1-2 sesiones · **Estado:** pendiente, no ejecutada
+**Tiempo estimado:** 1-2 sesiones · **Estado:** implementada en la rama
+`f2-mapa` (2026-10-21); **esperando el STOP gate de Luis** en telefono real
 
 ## Objetivo
 
@@ -49,14 +50,58 @@ Implementa las funcionalidades 1 y 2 de la ficha del proyecto:
 
 ## Criterios de salida
 
-- [ ] Mapa visible con circulos por magnitud y color por profundidad
-- [ ] Deslizador de tiempo funcional
-- [ ] Filtro por magnitud funcional
-- [ ] Vista de tabla como alternativa
-- [ ] Sin llamadas de red a `usgs.gov` desde el navegador (solo
-      `data/eventos.json` local)
-- [ ] Presupuesto de JS respetado o, si se excede, documentado con ADR
+- [x] Mapa visible con circulos por magnitud y color por profundidad
+- [x] Deslizador de tiempo funcional (desde / hasta, por año)
+- [x] Filtro por magnitud funcional
+- [x] Vista de tabla como alternativa
+- [x] Sin llamadas de red a `usgs.gov` desde el navegador: gate automatico
+      en `npm test` y captura CDP con todas las peticiones a `localhost`
+- [x] Presupuesto de JS respetado: 13,6 KB gzip de JS propio
+      (`docs/PERFORMANCE_BUDGET.md`)
+- [ ] Verificado por Luis en telefono real (STOP gate)
 
 ## STOP GATE
 
 Verificado por Luis en telefono real, con datos moviles y DevTools cerrado.
+
+## Implementacion (2026-10-21, Claude Code)
+
+- **Stack:** Vite 7 + Tailwind 4 (stack de `CLAUDE.md`) y Leaflet 1.9.4
+  (ADR-001), unicas dependencias. `npm test` sigue corriendo sin
+  `npm install` (los modulos probados no importan Leaflet ni Vite).
+- **Modulos:** `map.js` (unico con Leaflet, por `import()`), `puenteMapa.js`
+  (cola), `ui.js` (DOM), `data.js`, `buscar.js`, `frescura.js` (puros, con
+  tests), `api.js` (unico `fetch`, solo `data/`), `config.js`. Gate de
+  imports en `scripts/verificar-modulos.mjs`.
+- **Radio por magnitud:** `r = 3 px x 10^(0,2 (M - 3))`, acotado a 3-30 px. Ni
+  lineal ni por energia; el porque esta en `src/config.js` (`RADIO`).
+- **Color por profundidad:** clases 0-70 / 70-300 / >300 km (glosario del
+  USGS) con tres colores Okabe-Ito ordenados por luminancia (`PROFUNDIDAD`).
+- **Vista por defecto:** solo `en_venezuela` (ADR-003); interruptor "Region"
+  para todo el rectangulo, que se dibuja discontinuo. Nota visible del limite
+  del mar.
+- **Mapa base:** sin teselas, con los GeoJSON de `data/` (ADR-008).
+- **Trasplantes JARVIS:** tokens (ADR-004), chip de frescura (ADR-005, 13/13
+  casos de la spec), buscador con `/` (ADR-006), carga diferida (ADR-007).
+- **Tabla:** 100 filas por tanda, "Ver en el mapa" en cada fila.
+- **Ventana del evento:** minima (magnitud, lugar, fecha UTC y de Caracas,
+  profundidad, territorio, confianza, enlace al USGS). La ficha completa es de
+  la Fase 3.
+
+## Decisiones de Luis (2026-10-21)
+
+1. **Franja costera** (ADR-009): los eventos a <= 50 km de la costa que no
+   estan en tierra venezolana llevan `frente_costa: true` y se muestran por
+   defecto con esa etiqueta. Un sismo en tierra de otro pais lleva
+   `pais_vecino` (ISO, Natural Earth 1:50m) y nunca `frente_costa`.
+   Resultado: 645 en tierra, 1077 frente a la costa, 6 en la zona en disputa
+   (1728 en "Solo Venezuela"), 1827 en paises vecinos, 803 en mar abierto;
+   4358 en la region.
+2. **Zona en disputa en "Solo Venezuela"**, etiquetada "zona en disputa"
+   (precedente P-4 de trato neutral).
+3. **Sin teselas**: ADR-008 aceptado.
+4. **Estetica aprobada**: ADR-004 a ADR-007 aceptados, paleta de profundidad y
+   estilo de la zona en disputa incluidos; umbrales del chip 2/7 dias.
+5. Sigue pendiente la URL publica del repositorio para enlazar el
+   `DISCLAIMER.md` completo (`ENLACES.repo`); el remoto existe pero es
+   privado.

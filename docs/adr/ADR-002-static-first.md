@@ -1,6 +1,6 @@
 # ADR-002 — Static-first: Action diaria en vez de consulta en vivo al USGS
 
-**Fecha:** 2026-09-29 · **Estado:** Propuesto, pendiente de aprobacion de Luis
+**Fecha:** 2026-09-29 · **Estado:** Aceptado (Luis, 2026-10-20)
 en el STOP gate de la Fase 0
 
 ## Contexto

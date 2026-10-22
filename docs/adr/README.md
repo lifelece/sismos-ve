@@ -13,8 +13,15 @@ no se reescribe el que ya existe. El historial es el valor.
 
 | ADR | Titulo | Estado |
 |---|---|---|
-| [ADR-001](ADR-001-leaflet.md) | Leaflet como motor de mapa | Propuesto |
-| [ADR-002](ADR-002-static-first.md) | Static-first: Action diaria en vez de consulta en vivo | Propuesto |
+| [ADR-001](ADR-001-leaflet.md) | Leaflet como motor de mapa | Aceptado (2026-10-20) |
+| [ADR-002](ADR-002-static-first.md) | Static-first: Action diaria en vez de consulta en vivo | Aceptado (2026-10-20) |
+| [ADR-003](ADR-003-region-rectangulo-etiqueta.md) | Region: rectangulo del USGS + etiqueta por poligono | Aceptada (2026-10-21) |
+| [ADR-004](ADR-004-tokens-instrumento-oscuro.md) | Tokens "instrumento tecnico oscuro" para el shell (trasplante JARVIS) | Aceptada (2026-10-21) |
+| [ADR-005](ADR-005-chip-frescura.md) | Chip de frescura del catalogo (trasplante JARVIS) | Aceptada (2026-10-21) |
+| [ADR-006](ADR-006-buscador-atajo.md) | Buscador de eventos con atajo "/" (trasplante JARVIS) | Aceptada (2026-10-21) |
+| [ADR-007](ADR-007-carga-diferida-leaflet.md) | Carga diferida de Leaflet (trasplante JARVIS) | Aceptada (2026-10-21) |
+| [ADR-008](ADR-008-mapa-base-vectorial.md) | Mapa base vectorial propio mientras se decide el proveedor de teselas | Aceptada (2026-10-21): sin teselas |
+| [ADR-009](ADR-009-franja-costera-y-disputa-en-vista.md) | Franja costera de 50 km y zona en disputa en la vista por defecto | Aceptada (2026-10-21) |
 
 ## Plantilla
 

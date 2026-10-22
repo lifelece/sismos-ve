@@ -6,9 +6,25 @@
   "description": "Panel web de actividad sismica en Venezuela con datos publicos del USGS",
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
-  "scripts": {},
-  "dependencies": {},
-  "devDependencies": {}
+  "scripts": {
+    "dev": "vite",
+    "dev:host": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "test": "node --test \"test/*.test.mjs\"",
+    "data:fetch": "node scripts/fetch-eventos.mjs",
+    "data:validate": "node scripts/validate-eventos.mjs",
+    "data:etiquetar": "node scripts/etiquetar-eventos.mjs",
+    "verificar:modulos": "node scripts/verificar-modulos.mjs"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "vite": "^7.3.7"
+  }
 }

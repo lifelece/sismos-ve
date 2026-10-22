@@ -7,8 +7,8 @@ para Claude Code, criterios de salida y STOP gate.
 
 | Fase | Archivo | Estado |
 |---|---|---|
-| 0 — Setup | [FASE-0-SETUP.md](FASE-0-SETUP.md) | **En curso** — pendiente del gate |
-| 1 — Datos | [FASE-1-DATOS.md](FASE-1-DATOS.md) | Pendiente (no ejecutar hasta cerrar F0) |
+| 0 — Setup | [FASE-0-SETUP.md](FASE-0-SETUP.md) | Cerrada (Luis, 2026-10-20) |
+| 1 — Datos | [FASE-1-DATOS.md](FASE-1-DATOS.md) | **En curso** — rama `f1-datos`, esperando el STOP gate |
 | 2 — Mapa + filtros | [FASE-2-MAPA-FILTROS.md](FASE-2-MAPA-FILTROS.md) | Pendiente |
 | 3 — Estadisticas | [FASE-3-ESTADISTICAS.md](FASE-3-ESTADISTICAS.md) | Pendiente |
 | 4 — Publicacion | [FASE-4-PUBLICACION.md](FASE-4-PUBLICACION.md) | Pendiente |
