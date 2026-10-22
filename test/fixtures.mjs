@@ -56,5 +56,6 @@ export function eventoValido() {
   f.properties.en_venezuela = false;
   f.properties.zona_disputada = false;
   f.properties.frente_costa = false;
+  f.properties.pais_vecino = "COL";
   return f;
 }

@@ -22,7 +22,8 @@ import { ANIO_INICIO, MAGNITUD_MINIMA, PROFUNDIDAD, RADIO, VISTA_INICIAL } from 
  * @property {string} confianza  alta | media
  * @property {boolean} enVenezuela
  * @property {boolean} zonaDisputada
- * @property {boolean} frenteCosta  a <= 50 km de la costa, fuera de tierra venezolana
+ * @property {boolean} frenteCosta  a <= 50 km de la costa, fuera de tierra venezolana o de otro pais
+ * @property {string|null} paisVecino ISO alfa-3 si el epicentro cae en tierra de otro pais
  */
 
 /** @returns {Evento} */
@@ -44,6 +45,7 @@ export function normalizarEvento(feature) {
     enVenezuela: p.en_venezuela === true,
     zonaDisputada: p.zona_disputada === true,
     frenteCosta: p.frente_costa === true,
+    paisVecino: p.pais_vecino ?? null,
   };
 }
 

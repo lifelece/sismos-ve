@@ -95,6 +95,7 @@ ese proyecto:
 | Frontera nacional (`nivel: "pais"`, 23 anillos: tierra firme e islas) | geoBoundaries gbOpen VEN ADM0, origen Natural Earth | Dominio publico | Ninguna (cita recomendada) |
 | Limites estatales (`nivel: "estado"`) | geoBoundaries gbOpen VEN ADM1, origen OCHA Venezuela / Instituto Nacional de Estadistica | CC BY 3.0 IGO | **Atribucion e indicacion de cambios**: geometria simplificada por orinoco-digital (Douglas-Peucker, 0,004 grados; coordenadas a 4 decimales) |
 | Zona en disputa de la Guayana Esequiba | Natural Earth, `ne_10m_admin_0_disputed_areas` (`TYPE: Disputed`) | Dominio publico | Ninguna (cita recomendada) |
+| Paises vecinos (`data/paises-vecinos.geojson`: ABW, BRA, COL, CUW, GRD, GUY, NLD, TTO, VCT) | Natural Earth 1:50m Admin 0 - Countries (`nvkelso/natural-earth-vector`, `geojson/ne_50m_admin_0_countries.geojson`, commit `9380cca`, 2022-05-13), descargado una vez el 2026-10-21 y recortado a la caja de la consulta por `scripts/vecinos-to-geojson.mjs` | Dominio publico (https://www.naturalearthdata.com/about/terms-of-use/) | Ninguna (cita recomendada: "Made with Natural Earth") |
 
 Atribucion que usa este proyecto (README y pie de la interfaz):
 
@@ -107,6 +108,8 @@ Huellas SHA-256 de las copias (para comprobar que no se tocaron):
 ```
 e2daf4bf3298682a9900680fd9746017c58db4321ee987250e8555fb87d0165c  data/limites-venezuela.geojson
 fde72d239eaba1ffa3ad9d36ad2f59b5e8c83ebd75d4b9d1adc9e9f5ae03ed46  data/zona-disputada.geojson
+e75bf6538193a6f016ec95f43a036bc72cee6c082fa4950f2db9adcec3556e6b  data/paises-vecinos.geojson (generado)
+3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb  ne_50m_admin_0_countries.geojson (entrada, no versionada)
 ```
 
 **Uso.** La frontera nacional y la zona en disputa sirven para calcular las

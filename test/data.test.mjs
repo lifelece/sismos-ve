@@ -43,6 +43,7 @@ test("normalizarEvento conserva lo que la interfaz necesita, con nombres propios
     enVenezuela: false,
     zonaDisputada: false,
     frenteCosta: false,
+    paisVecino: "COL",
   });
 });
 

@@ -131,6 +131,17 @@ export function validarEvento(feature, { ahora = Date.now(), territorio = null }
     etiquetasBien = false;
   }
 
+  if (!Object.hasOwn(p, "pais_vecino")) {
+    errores.push("sin pais_vecino (null o ISO alfa-3)");
+    etiquetasBien = false;
+  } else if (p.pais_vecino !== null && !/^[A-Z]{3}$/.test(p.pais_vecino)) {
+    errores.push(`pais_vecino no es null ni un ISO alfa-3 (${JSON.stringify(p.pais_vecino)})`);
+    etiquetasBien = false;
+  } else if (p.pais_vecino !== null && ETIQUETAS.some((clave) => p[clave] === true)) {
+    errores.push("pais_vecino con otra etiqueta de territorio en true (son excluyentes)");
+    etiquetasBien = false;
+  }
+
   // Geometria: Point [lon, lat, profundidad_km].
   const g = feature.geometry;
   if (!g || g.type !== "Point" || !Array.isArray(g.coordinates)) {
@@ -144,7 +155,7 @@ export function validarEvento(feature, { ahora = Date.now(), territorio = null }
     }
     if (territorio && etiquetasBien) {
       const esperadas = etiquetasDe([lon, lat], territorio);
-      for (const clave of ETIQUETAS) {
+      for (const clave of [...ETIQUETAS, "pais_vecino"]) {
         if (p[clave] !== esperadas[clave]) {
           errores.push(`${clave} = ${p[clave]} no coincide con el poligono de data/ (deberia ser ${esperadas[clave]})`);
         }

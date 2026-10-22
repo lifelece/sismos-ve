@@ -147,7 +147,7 @@ test("etiquetarColeccion solo anade las etiquetas: el resto queda identico", asy
   assert.deepEqual(entrada, copia, "no muta la entrada");
   assert.deepEqual(salida.features.map((f) => f.properties.en_venezuela), [false, true]);
   for (const [i, f] of salida.features.entries()) {
-    const { en_venezuela, zona_disputada, frente_costa, ...resto } = f.properties;
+    const { en_venezuela, zona_disputada, frente_costa, pais_vecino, ...resto } = f.properties;
     assert.deepEqual(resto, copia.features[i].properties);
     assert.deepEqual(f.geometry, copia.features[i].geometry);
   }
@@ -221,7 +221,7 @@ test("el CLI de re-etiquetado reescribe el archivo con las etiquetas y valida", 
     await writeFile(ruta, serializar(entrada));
     const r = spawnSync(process.execPath, [script, ruta], { encoding: "utf8" });
     assert.equal(r.status, 0, r.stdout + r.stderr);
-    assert.match(r.stdout, /1 en Venezuela, 0 frente a la costa, 0 en la zona en disputa, 1 fuera/);
+    assert.match(r.stdout, /1 en Venezuela, 0 frente a la costa, 0 en la zona en disputa, 1 en paises vecinos, 0 en mar abierto/);
     const salida = JSON.parse(await readFile(ruta, "utf8"));
     assert.deepEqual(salida.features.map((f) => f.properties.en_venezuela), [false, true]);
     assert.equal(salida.features[0].properties.ultima_verificacion, "2026-10-20", "no cambia la fecha de verificacion");

@@ -58,7 +58,7 @@
   "aviso.noAlerta": "This dashboard is educational and informational. It is not an early-warning system: it does not detect earthquakes as they happen, send alerts or predict earthquakes, and must not be used for safety, evacuation or emergency decisions. If you feel an earthquake, follow your local official protocols.",
   "aviso.funvisis": "Data comes from the USGS global catalog. The reference network in Venezuela is FUNVISIS, which may report a different magnitude, epicenter or depth for the same event. Only the USGS version is shown here, not averaged or corrected.",
   "aviso.desfase": "The catalog is refreshed once a day: an event may take 24 hours or more to appear, and the USGS may revise events later.",
-  "aviso.territorio": "“Venezuela only” includes the geoBoundaries land polygon with islands, a 50 km band off its coast (which does not tell the sea from neighboring land such as Trinidad) and the disputed zone of Guayana Esequiba, labeled separately with Natural Earth’s classification. The project takes no political position.",
+  "aviso.territorio": "“Venezuela only” includes the geoBoundaries land polygon with islands, a 50 km band off its coast (outside other countries' land) and the disputed zone of Guayana Esequiba, labeled separately with Natural Earth’s classification. The project takes no political position.",
   "aviso.completo": "Full notice (DISCLAIMER.md)",
   "aviso.cerrar": "Got it",
   "evento.fecha": "Date",

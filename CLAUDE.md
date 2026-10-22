@@ -99,7 +99,8 @@ poligonos versionados en `data/`:
 |---|---|---|
 | `en_venezuela` | Punto en poligono contra la frontera **terrestre** de Venezuela con islas (`data/limites-venezuela.geojson`, geoBoundaries ADM0) | Booleano. Un epicentro en el mar queda en `false` (limite conocido) |
 | `zona_disputada` | Punto en poligono contra la zona en disputa de la Guayana Esequiba (`data/zona-disputada.geojson`, Natural Earth) | Booleano, excluyente con `en_venezuela`. Trato neutral: la clasificacion es de la fuente |
-| `frente_costa` | Fuera de tierra venezolana y de la zona en disputa, a <= 50 km de la costa (ADR-009) | Booleano, excluyente. No distingue el mar de la tierra de paises vecinos (limite conocido) |
+| `frente_costa` | Fuera de tierra venezolana y de la zona en disputa, a <= 50 km de la costa (ADR-009) | Booleano, excluyente. Nunca true en tierra de otro pais |
+| `pais_vecino` | ISO alfa-3 si el epicentro cae en tierra de otro pais (`data/paises-vecinos.geojson`, Natural Earth 1:50m) | `null` en cualquier otro caso |
 
 **No se descarta ningun campo original del USGS** (`mag`, `place`, `time`,
 `depth`, `magType`, `url`, `title`, etc.): el contrato se anade, no reemplaza.

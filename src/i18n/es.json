@@ -58,7 +58,7 @@
   "aviso.noAlerta": "Este panel es educativo y de divulgación. No es un sistema de alerta temprana: no detecta sismos en curso, no envía avisos ni predice sismos, y no debe usarse para decisiones de seguridad, evacuación ni emergencias. Si sientes un sismo, sigue los protocolos oficiales de tu localidad.",
   "aviso.funvisis": "Los datos son del catálogo global del USGS. La red de referencia en Venezuela es FUNVISIS, y puede dar otra magnitud, epicentro o profundidad para el mismo evento. Aquí solo se muestra la versión del USGS, sin promediar ni corregir.",
   "aviso.desfase": "El catálogo se actualiza una vez al día: un evento puede tardar 24 horas o más en aparecer, y el USGS puede revisar eventos después.",
-  "aviso.territorio": "«Solo Venezuela» incluye el polígono terrestre con islas de geoBoundaries, una franja de 50 km frente a su costa (que no distingue el mar de la tierra de países vecinos como Trinidad) y la zona en disputa de la Guayana Esequiba, etiquetada aparte con la clasificación de Natural Earth. El proyecto no toma posición política.",
+  "aviso.territorio": "«Solo Venezuela» incluye el polígono terrestre con islas de geoBoundaries, una franja de 50 km frente a su costa (fuera de la tierra de otros países) y la zona en disputa de la Guayana Esequiba, etiquetada aparte con la clasificación de Natural Earth. El proyecto no toma posición política.",
   "aviso.completo": "Texto completo del aviso (DISCLAIMER.md)",
   "aviso.cerrar": "Entendido",
   "evento.fecha": "Fecha",

@@ -24,16 +24,19 @@ el mar frente a la costa, y los 6 de la zona en disputa.
 
 ## Consecuencias
 
-- Catalogo del 2026-10-21: 645 en tierra, 1095 frente a la costa, 6 en la zona
-  en disputa, 2612 fuera (4358 en la region).
-- **Limite conocido:** sin poligonos de otros paises, la franja no distingue el
-  mar de la tierra vecina a menos de 50 km: de los 1095, 225 llevan "Trinidad"
-  en el texto del USGS, 8 "Colombia", 6 "Windward Islands" y 2 "Guyana". La
-  etiqueta dice "a 50 km o menos de la costa", no "en el mar".
+- Campo `pais_vecino` (ISO alfa-3 o null), con Natural Earth admin-0 1:50m
+  recortado a la caja de la consulta (`data/paises-vecinos.geojson`, 17 KB,
+  dominio publico): un sismo en tierra de otro pais nunca es `frente_costa`
+  ni sale en "Solo Venezuela" (arreglo tecnico del Director, 2026-10-21).
+  Orden: zona en disputa > tierra de Venezuela > pais vecino > franja costera.
+- Catalogo del 2026-10-21 (4358 en la region): 645 en tierra, 1077 frente a la
+  costa, 6 en la zona en disputa, 1827 en paises vecinos y 803 en mar abierto.
+  "Solo Venezuela" muestra 1728.
+- La costa de Natural Earth 1:50m es mas gruesa que la de geoBoundaries: cerca
+  de la orilla de otro pais, la etiqueta tiene la precision de esa escala.
 - El ancla este queda a 19,7 km del vertice elegido (la linea esta
   simplificada): la costa atlantica junto a la linea de facto es aproximada.
 
 ## Cuando reconsiderar
 
-- Si se incorporan poligonos de los paises vecinos o una ZEE con fuente: la
-  franja pasa a excluir su tierra o se sustituye por la ZEE (ADR nuevo).
+- Si se incorpora una ZEE con fuente: puede sustituir a la franja (ADR nuevo).

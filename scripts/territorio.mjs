@@ -33,6 +33,7 @@ import { fileURLToPath } from "node:url";
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const RUTA_LIMITES = join(RAIZ, "data", "limites-venezuela.geojson");
 export const RUTA_DISPUTA = join(RAIZ, "data", "zona-disputada.geojson");
+export const RUTA_VECINOS = join(RAIZ, "data", "paises-vecinos.geojson");
 
 /**
  * Ray casting par-impar: cuenta cuantas aristas cruza un rayo horizontal
@@ -217,7 +218,7 @@ function multipoligono(anillos) {
  * @param {{ limites: object, disputa: object }} colecciones GeoJSON ya parseados
  * @returns {{ venezuela: object, disputa: object }} dos MultiPolygon
  */
-export function cargarTerritorio({ limites, disputa }) {
+export function cargarTerritorio({ limites, disputa, vecinos = null }) {
   const venezuela = multipoligono(anillosDePais(limites, "pais"));
   const costa = lineasDeCosta(venezuela);
   const margen = DISTANCIA_COSTA_KM / KM_POR_GRADO / Math.cos((13 * Math.PI) / 180);
@@ -225,16 +226,20 @@ export function cargarTerritorio({ limites, disputa }) {
   return {
     venezuela,
     disputa: multipoligono(anillosDePais(disputa, "disputa")),
+    vecinos: (vecinos?.features ?? []).map((f) => ({
+      iso: f.properties.iso,
+      geometria: { ...f.geometry, caja: caja(f.geometry.coordinates.flatMap((pol) => pol[0])) },
+    })),
     costa: { lineas: costa, caja: [x0 - margen, y0 - margen, x1 + margen, y1 + margen] },
   };
 }
 
 /** Lee los dos GeoJSON versionados en data/ y construye el territorio. */
-export async function leerTerritorio({ rutaLimites = RUTA_LIMITES, rutaDisputa = RUTA_DISPUTA } = {}) {
-  const [limites, disputa] = await Promise.all(
-    [rutaLimites, rutaDisputa].map(async (ruta) => JSON.parse(await readFile(ruta, "utf8")))
+export async function leerTerritorio({ rutaLimites = RUTA_LIMITES, rutaDisputa = RUTA_DISPUTA, rutaVecinos = RUTA_VECINOS } = {}) {
+  const [limites, disputa, vecinos] = await Promise.all(
+    [rutaLimites, rutaDisputa, rutaVecinos].map(async (ruta) => JSON.parse(await readFile(ruta, "utf8")))
   );
-  return cargarTerritorio({ limites, disputa });
+  return cargarTerritorio({ limites, disputa, vecinos });
 }
 
 function cercaDeCosta(punto, costa) {
@@ -255,7 +260,10 @@ function dentro(punto, geometria) {
  * Etiquetas de un punto [lon, lat]. Excluyentes: como mucho una es true.
  * `frente_costa`: fuera de la tierra de Venezuela y de la zona en disputa, a
  * <= 50 km de la costa venezolana. No distingue el mar de la tierra de otros
- * paises (Trinidad, islas ABC, Guajira colombiana): no hay poligonos de ellos.
+ * `pais_vecino`: ISO alfa-3 del pais (Natural Earth 1:50m) si el epicentro cae en
+ * tierra de otro pais; null si no. Orden: zona en disputa > tierra de Venezuela >
+ * pais vecino > franja costera. Un sismo en tierra de otro pais nunca es
+ * `frente_costa` (ADR-009).
  *
  * Las dos fuentes trazan la frontera de facto con vertices distintos
  * (geoBoundaries simplificado a ~440 m frente a Natural Earth), asi que hay
@@ -266,7 +274,10 @@ function dentro(punto, geometria) {
 export function etiquetasDe(punto, territorio) {
   const zona_disputada = dentro(punto, territorio.disputa);
   const en_venezuela = !zona_disputada && dentro(punto, territorio.venezuela);
-  return { en_venezuela, zona_disputada, frente_costa: !zona_disputada && !en_venezuela && cercaDeCosta(punto, territorio.costa) };
+  const pais_vecino =
+    zona_disputada || en_venezuela ? null : (territorio.vecinos.find((v) => dentro(punto, v.geometria))?.iso ?? null);
+  const frente_costa = !zona_disputada && !en_venezuela && !pais_vecino && cercaDeCosta(punto, territorio.costa);
+  return { en_venezuela, zona_disputada, frente_costa, pais_vecino };
 }
 
 /** Devuelve una copia del evento con las dos etiquetas. No muta la entrada. */

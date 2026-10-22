@@ -112,23 +112,27 @@ test("un evento no puede estar a la vez en Venezuela y en la zona en disputa", (
   assert.match(erroresDe(doble).join(), /mas de una etiqueta/);
   assert.match(erroresDe(evento({ props: { en_venezuela: true, frente_costa: true } })).join(), /mas de una etiqueta/);
   assert.match(erroresDe(evento({ props: { frente_costa: undefined } })).join(), /sin frente_costa/);
+  assert.match(erroresDe(evento({ props: { pais_vecino: undefined } })).join(), /sin pais_vecino/);
+  assert.match(erroresDe(evento({ props: { pais_vecino: "co" } })).join(), /ISO alfa-3/);
+  assert.match(erroresDe(evento({ props: { frente_costa: true } })).join(), /pais_vecino con otra etiqueta/);
 });
 
 test("con el territorio, una etiqueta que no coincide con el poligono tumba el registro", async () => {
   const territorio = await leerTerritorio();
   const conTerritorio = (f) => validarEvento(f, { ahora: Date.parse("2026-10-20T12:00:00Z"), territorio });
   // Cepita (Colombia) marcado como Venezuela: mentira detectable.
-  assert.match(conTerritorio(evento({ props: { en_venezuela: true } })).join(), /en_venezuela = true no coincide/);
+  assert.match(conTerritorio(evento({ props: { en_venezuela: true, pais_vecino: null } })).join(), /en_venezuela = true no coincide/);
+  assert.match(conTerritorio(evento({ props: { pais_vecino: "BRA" } })).join(), /pais_vecino = BRA no coincide/);
   // Caracas marcado fuera de Venezuela.
   const caracas = evento({ coordenadas: [-66.9036, 10.4806, 5] });
   assert.match(conTerritorio(caracas).join(), /en_venezuela = false no coincide/);
   // Las etiquetas correctas pasan.
   assert.deepEqual(conTerritorio(evento()), []);
-  assert.deepEqual(conTerritorio(evento({ coordenadas: [-66.9036, 10.4806, 5], props: { en_venezuela: true } })), []);
+  assert.deepEqual(conTerritorio(evento({ coordenadas: [-66.9036, 10.4806, 5], props: { en_venezuela: true, pais_vecino: null } })), []);
 });
 
 test("el CLI comprueba las etiquetas contra los poligonos de data/", async () => {
-  await conArchivo(JSON.stringify(coleccion([evento({ props: { en_venezuela: true } })])), (r) => {
+  await conArchivo(JSON.stringify(coleccion([evento({ props: { en_venezuela: true, pais_vecino: null } })])), (r) => {
     assert.equal(r.status, 1, r.stdout);
     assert.match(r.stdout, /no coincide con el poligono/);
   });

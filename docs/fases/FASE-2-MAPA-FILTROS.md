@@ -92,9 +92,11 @@ Verificado por Luis en telefono real, con datos moviles y DevTools cerrado.
 
 1. **Franja costera** (ADR-009): los eventos a <= 50 km de la costa que no
    estan en tierra venezolana llevan `frente_costa: true` y se muestran por
-   defecto con esa etiqueta. Resultado: 645 en tierra, 1095 frente a la costa,
-   6 en la zona en disputa, 4358 en la region. Limite: 225 de los 1095 estan
-   bajo Trinidad (sin poligonos de paises vecinos).
+   defecto con esa etiqueta. Un sismo en tierra de otro pais lleva
+   `pais_vecino` (ISO, Natural Earth 1:50m) y nunca `frente_costa`.
+   Resultado: 645 en tierra, 1077 frente a la costa, 6 en la zona en disputa
+   (1728 en "Solo Venezuela"), 1827 en paises vecinos, 803 en mar abierto;
+   4358 en la region.
 2. **Zona en disputa en "Solo Venezuela"**, etiquetada "zona en disputa"
    (precedente P-4 de trato neutral).
 3. **Sin teselas**: ADR-008 aceptado.
