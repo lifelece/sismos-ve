@@ -37,3 +37,9 @@ solo con los campos que usa la interfaz. Ver "Cuando reconsiderar" de ADR-002.
 peticiones, todas a `localhost` (ninguna a `usgs.gov` ni a terceros), sin
 desplazamiento horizontal (`scrollWidth` = 390). No representa red movil: la
 cifra que vale es la del telefono de Luis y, tras publicar, PageSpeed movil.
+
+## Build de la Fase 3 (2026-10-26, `npm run build`)
+
+JS propio `index`: 48,0 KB sin comprimir, **15,7 KB gzip** (Fase 2: 11,7 KB); con
+`map` (1,3 KB) y `precarga` (0,7 KB), **17,7 KB gzip = 12 % del presupuesto**
+de 150 KB. Sin dependencias nuevas; CSS 4,8 KB gzip.

@@ -138,3 +138,61 @@ export function fechaUTC(ms) {
     `${dosDigitos(d.getUTCHours())}:${dosDigitos(d.getUTCMinutes())} UTC`
   );
 }
+
+// --- Fase 3: estadisticas -----------------------------------------------------------
+
+const RADIO_TIERRA_KM = 6371.0088; // radio medio de la IUGG
+
+const aRad = (grados) => (grados * Math.PI) / 180;
+
+/** Distancia en km sobre la esfera (formula haversine) entre dos puntos en grados. */
+export function distanciaKm(lat1, lon1, lat2, lon2) {
+  const dLat = aRad(lat2 - lat1);
+  const dLon = aRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(aRad(lat1)) * Math.cos(aRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * RADIO_TIERRA_KM * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+/** Conteo por año UTC, de `desde` a `hasta` inclusive; los años sin sismos valen 0. */
+export function histogramaPorAnio(eventos, desde, hasta) {
+  const barras = [];
+  for (let anio = desde; anio <= hasta; anio++) barras.push({ anio, n: 0 });
+  for (const e of eventos) {
+    if (e.anio >= desde && e.anio <= hasta) barras[e.anio - desde].n++;
+  }
+  return barras;
+}
+
+/** Los `n` de mayor magnitud; a igual magnitud, el mas reciente primero. No muta la entrada. */
+export function topPorMagnitud(eventos, n) {
+  return [...eventos].sort((a, b) => b.mag - a.mag || b.tiempo - a.tiempo).slice(0, n);
+}
+
+/**
+ * Eventos a `radioKm` o menos de una ciudad ({ lat, lon }), del mas reciente al
+ * mas antiguo, cada uno con su distancia. Distancia al epicentro, no a la zona
+ * de sacudida.
+ * @returns {Array<{ evento: Evento, km: number }>}
+ */
+export function cercaDeCiudad(eventos, ciudad, radioKm) {
+  const cerca = [];
+  for (const evento of eventos) {
+    const km = distanciaKm(ciudad.lat, ciudad.lon, evento.lat, evento.lon);
+    if (km <= radioKm) cerca.push({ evento, km });
+  }
+  return cerca.sort((a, b) => b.evento.tiempo - a.evento.tiempo);
+}
+
+/**
+ * Enlace a la ficha oficial del evento (properties.url del USGS), o null si no
+ * es https en earthquake.usgs.gov. El enlace lo abre la persona: la web no
+ * pide nada al USGS (CLAUDE.md regla 3).
+ */
+export function enlaceUsgs(evento) {
+  try {
+    const u = new URL(evento?.url);
+    return u.protocol === "https:" && u.hostname === "earthquake.usgs.gov" ? u.href : null;
+  } catch {
+    return null;
+  }
+}

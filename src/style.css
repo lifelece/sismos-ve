@@ -65,7 +65,8 @@ body {
   }
 }
 
-dialog#aviso {
+dialog#aviso,
+dialog#ficha {
   max-width: min(32rem, calc(100vw - 2rem));
   border: 1px solid var(--color-trazo);
   border-radius: 0.5rem;
@@ -73,7 +74,8 @@ dialog#aviso {
   color: var(--color-hi);
   padding: 0;
 }
-dialog#aviso::backdrop {
+dialog#aviso::backdrop,
+dialog#ficha::backdrop {
   background: rgb(0 0 0 / 0.6);
 }
 
@@ -118,6 +120,7 @@ dialog#aviso::backdrop {
 }
 
 /* Preflight de Tailwind quita el margen del dialogo: se recentra. */
-dialog#aviso {
+dialog#aviso,
+dialog#ficha {
   margin: auto;
 }

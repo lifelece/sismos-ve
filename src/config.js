@@ -100,3 +100,74 @@ export const ENLACES = Object.freeze({
   fdsn: "https://earthquake.usgs.gov/fdsnws/event/1/",
   repo: null,
 });
+
+/** Filas del top por magnitud (Fase 3, ficha del proyecto: "top 10"). */
+export const TOP_N = 10;
+
+/**
+ * "Cerca de mi ciudad" (Fase 3): radio en km desde la ciudad elegida. Rango
+ * pensado para Venezuela: 10 km es "la propia ciudad", 300 km cubre una region
+ * sismica entera (p. ej. los Andes desde Merida). Defecto 100 km. Propuesta.
+ */
+export const RADIO_CERCA = Object.freeze({ min: 10, max: 300, paso: 10, defecto: 100 });
+
+/** Eventos listados bajo "Cerca de mi ciudad" (el total se cuenta aparte). */
+export const CERCA_LISTA = 10;
+
+/**
+ * Procedencia de las coordenadas de CIUDADES (CLAUDE.md regla 4, FASE-3).
+ * Wikidata es CC0: se puede copiar y redistribuir sin atribucion; se cita por
+ * honestidad de fuente, igual que el USGS.
+ */
+export const CIUDADES_FUENTE = Object.freeze({
+  nombre: "Wikidata",
+  licencia: "CC0 1.0",
+  url: "https://www.wikidata.org/",
+  propiedad: "P625 (coordinate location) del item de la capital",
+  consulta: "2026-10-26",
+});
+
+/**
+ * Ciudades del selector "Cerca de mi ciudad": las 23 capitales de estado mas
+ * Caracas (Distrito Capital), decision de Luis del 2026-10-26. NO incluye la
+ * Guayana Esequiba (zona en disputa, trato aparte: regla neutralidad).
+ *
+ * Fuente: Wikidata (CC0), propiedad P625 del item `qid`; consulta unica el
+ * 2026-10-26 por SPARQL (capitales P36 de los estados de Venezuela) y
+ * Special:EntityData. lat/lon redondeados a 4 decimales (~11 m, de sobra para
+ * radios de km). Trujillo y San Fernando de Apure traen dos coordenadas en
+ * Wikidata (difieren < 1 km): se tomo la primera. Para verificar una fila:
+ * https://www.wikidata.org/wiki/<qid>. El nombre en pantalla es el del item,
+ * no se traduce (nombres propios).
+ */
+export const CIUDADES = Object.freeze(
+  [
+    { id: "barcelona", nombre: "Barcelona", estado: "Anzoátegui", lat: 10.1333, lon: -64.6833, qid: "Q391221" },
+    { id: "barinas", nombre: "Barinas", estado: "Barinas", lat: 8.6333, lon: -70.2167, qid: "Q695623" },
+    { id: "barquisimeto", nombre: "Barquisimeto", estado: "Lara", lat: 10.0678, lon: -69.3467, qid: "Q4709" },
+    { id: "caracas", nombre: "Caracas", estado: "Distrito Capital", lat: 10.5061, lon: -66.9144, qid: "Q1533" },
+    { id: "ciudad-bolivar", nombre: "Ciudad Bolívar", estado: "Bolívar", lat: 8.1029, lon: -63.547, qid: "Q26906" },
+    { id: "coro", nombre: "Coro", estado: "Falcón", lat: 11.395, lon: -69.6816, qid: "Q1134454" },
+    { id: "cumana", nombre: "Cumaná", estado: "Sucre", lat: 10.45, lon: -64.1667, qid: "Q319476" },
+    { id: "guanare", nombre: "Guanare", estado: "Portuguesa", lat: 9.0436, lon: -69.7489, qid: "Q733005" },
+    { id: "la-asuncion", nombre: "La Asunción", estado: "Nueva Esparta", lat: 11.0333, lon: -63.8628, qid: "Q860689" },
+    { id: "la-guaira", nombre: "La Guaira", estado: "La Guaira", lat: 10.6, lon: -66.9331, qid: "Q873405" },
+    { id: "los-teques", nombre: "Los Teques", estado: "Miranda", lat: 10.3411, lon: -67.0406, qid: "Q695631" },
+    { id: "maracaibo", nombre: "Maracaibo", estado: "Zulia", lat: 10.6333, lon: -71.6333, qid: "Q171632" },
+    { id: "maracay", nombre: "Maracay", estado: "Aragua", lat: 10.2469, lon: -67.5958, qid: "Q333928" },
+    { id: "maturin", nombre: "Maturín", estado: "Monagas", lat: 9.7423, lon: -63.1889, qid: "Q842779" },
+    { id: "merida", nombre: "Mérida", estado: "Mérida", lat: 8.5702, lon: -71.1802, qid: "Q23551" },
+    { id: "puerto-ayacucho", nombre: "Puerto Ayacucho", estado: "Amazonas", lat: 5.6631, lon: -67.6264, qid: "Q372920" },
+    { id: "san-carlos", nombre: "San Carlos", estado: "Cojedes", lat: 9.65, lon: -68.5833, qid: "Q995718" },
+    { id: "san-cristobal", nombre: "San Cristóbal", estado: "Táchira", lat: 7.7682, lon: -72.2322, qid: "Q820235" },
+    { id: "san-felipe", nombre: "San Felipe", estado: "Yaracuy", lat: 10.3353, lon: -68.7458, qid: "Q965754" },
+    { id: "san-fernando-de-apure", nombre: "San Fernando de Apure", estado: "Apure", lat: 7.8878, lon: -67.4724, qid: "Q990764" },
+    { id: "san-juan-de-los-morros", nombre: "San Juan de los Morros", estado: "Guárico", lat: 9.8864, lon: -67.3448, qid: "Q999117" },
+    { id: "trujillo", nombre: "Trujillo", estado: "Trujillo", lat: 9.3658, lon: -70.4369, qid: "Q1020535" },
+    { id: "tucupita", nombre: "Tucupita", estado: "Delta Amacuro", lat: 9.0575, lon: -62.0452, qid: "Q179007" },
+    { id: "valencia", nombre: "Valencia", estado: "Carabobo", lat: 10.1667, lon: -68.0, qid: "Q54880" },
+  ].map((c) => Object.freeze(c))
+);
+
+/** Ciudad preseleccionada en "Cerca de mi ciudad" (la capital; no es geolocalizacion). */
+export const CIUDAD_POR_DEFECTO = "caracas";
