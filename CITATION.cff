@@ -1,0 +1,25 @@
+# Formato Citation File Format 1.2.0. Sin `version`, `date-released` ni DOI
+# hasta que exista el primer tag publico: no se inventan datos de version antes
+# de que existan (mismo criterio que Orinoco ADR-015).
+cff-version: 1.2.0
+message: >-
+  Si usas sismos-ve en un trabajo, citalo con estos metadatos. Los datos de
+  terceros se citan ademas en su fuente original: ver LICENSE-DATA.
+type: software
+title: "sismos-ve"
+abstract: >-
+  Panel web de divulgacion sobre la actividad sismica en Venezuela: mapa,
+  linea de tiempo, estadisticas y sismos cerca de una ciudad, con el catalogo
+  publico del USGS. No es un sistema de alerta temprana.
+authors:
+  - given-names: "Luis Carlos"
+    family-names: "Vasquez"
+repository-code: "https://github.com/lifelece/sismos-ve"
+license: MIT
+keywords:
+  - earthquakes
+  - seismicity
+  - Venezuela
+  - USGS
+  - open data
+  - Leaflet

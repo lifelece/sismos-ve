@@ -13,6 +13,7 @@ import {
   distanciaKm,
   enlaceUsgs,
   histogramaPorAnio,
+  resumenHistograma,
   normalizarColeccion,
   topPorMagnitud,
 } from "../src/data.js";
@@ -199,4 +200,26 @@ test("ningun modulo de src/ usa la geolocalizacion del navegador (CLAUDE.md regl
     const codigo = texto.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
     assert.doesNotMatch(codigo, /geolocation|getCurrentPosition|watchPosition/, a);
   }
+});
+
+// --- H-13: resumen calculado del histograma (texto alternativo) -----------------------
+
+test("resumenHistograma: total, año con más sismos, magnitud máxima y porcentaje por barra", () => {
+  const eventos = [ev("a", 4, 2000), ev("b", 6.2, 2000), ev("c", 3, 2001), ev("d", 5, 2001), ev("e", 3.5, 2001), ev("f", 3, 2003)];
+  const barras = histogramaPorAnio(eventos, 2000, 2003);
+  const r = resumenHistograma(barras, eventos);
+  assert.equal(r.total, 6);
+  assert.deepEqual(r.cima, { anio: 2001, n: 3 });
+  assert.equal(r.magMax, 6.2);
+  assert.deepEqual(r.porcentajes, [(2 / 6) * 100, 50, 0, (1 / 6) * 100]);
+  assert.ok(Math.abs(r.porcentajes.reduce((a, b) => a + b, 0) - 100) < 1e-9);
+});
+
+test("resumenHistograma: empate de cima = año más antiguo; sin eventos no divide por cero", () => {
+  const dos = [ev("a", 4, 2000), ev("b", 4, 2002)];
+  assert.equal(resumenHistograma(histogramaPorAnio(dos, 2000, 2002), dos).cima.anio, 2000);
+  const vacio = resumenHistograma(histogramaPorAnio([], 2000, 2001), []);
+  assert.equal(vacio.total, 0);
+  assert.equal(vacio.magMax, null);
+  assert.deepEqual(vacio.porcentajes, [0, 0]);
 });

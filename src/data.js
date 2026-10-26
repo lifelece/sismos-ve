@@ -163,6 +163,23 @@ export function histogramaPorAnio(eventos, desde, hasta) {
   return barras;
 }
 
+/**
+ * Resumen calculado del histograma (texto alternativo, H-13): total, año con
+ * mas sismos (a igual conteo, el mas antiguo), magnitud maxima de los eventos
+ * (null si no hay) y el porcentaje de cada barra sobre el total.
+ */
+export function resumenHistograma(barras, eventos) {
+  const total = barras.reduce((s, b) => s + b.n, 0);
+  const cima = barras.reduce((a, b) => (b.n > a.n ? b : a), barras[0] ?? { anio: null, n: 0 });
+  const magMax = eventos.length ? Math.max(...eventos.map((e) => e.mag)) : null;
+  return {
+    total,
+    cima: { anio: cima.anio, n: cima.n },
+    magMax,
+    porcentajes: barras.map((b) => (total ? (b.n / total) * 100 : 0)),
+  };
+}
+
 /** Los `n` de mayor magnitud; a igual magnitud, el mas reciente primero. No muta la entrada. */
 export function topPorMagnitud(eventos, n) {
   return [...eventos].sort((a, b) => b.mag - a.mag || b.tiempo - a.tiempo).slice(0, n);

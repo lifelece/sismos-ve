@@ -4,8 +4,8 @@
 > **Gate de salida:** verificado en telefono real, datos moviles, DevTools
 > cerrado.
 
-**Tiempo estimado:** 1-2 sesiones · **Estado:** implementada en la rama
-`f3-estadisticas` (2026-10-26); **esperando el STOP gate de Luis** en telefono real
+**Tiempo estimado:** 1-2 sesiones · **Estado:** **cerrada** (Luis, PR #3
+mergeado el 2026-10-26 tras el gate en telefono real)
 
 ## Objetivo
 

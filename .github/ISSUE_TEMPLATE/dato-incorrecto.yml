@@ -1,0 +1,38 @@
+name: Reportar dato incorrecto / Report incorrect data
+description: Un sismo, una ciudad o un limite aparece mal. / An earthquake, city or boundary looks wrong.
+title: "[Dato] "
+labels: ["dato-incorrecto"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias. Este panel muestra el catalogo del USGS tal cual: si la cifra difiere de la del USGS, es un error nuestro; si difiere de FUNVISIS, es una diferencia de fuentes (ver DISCLAIMER.md). Un reporte sin fuente no se puede verificar.
+
+        Thanks. This dashboard shows the USGS catalog as is: if a figure differs from USGS, it is our error; if it differs from FUNVISIS, it is a source difference (see DISCLAIMER.md). A report without a source cannot be verified.
+  - type: input
+    id: evento
+    attributes:
+      label: Id del evento USGS o ciudad / USGS event id or city
+      description: "Ejemplo / Example: us7000xxxx (ficha del evento, enlace al USGS)"
+    validations:
+      required: true
+  - type: textarea
+    id: que
+    attributes:
+      label: Que se ve y que deberia verse / What you see and what it should be
+    validations:
+      required: true
+  - type: input
+    id: fuente
+    attributes:
+      label: Enlace a la fuente que lo respalda / Link to the supporting source
+      description: Pagina oficial del USGS, FUNVISIS u otra fuente publica. / Official USGS, FUNVISIS or other public source.
+    validations:
+      required: true
+  - type: checkboxes
+    id: aviso
+    attributes:
+      label: Confirmo / I confirm
+      options:
+        - label: Entiendo que esto no es un sistema de alerta ni una fuente oficial. / I understand this is not an early-warning system nor an official source.
+          required: true

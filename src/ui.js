@@ -18,6 +18,7 @@ import {
   filtrarEventos,
   filtroInicial,
   histogramaPorAnio,
+  resumenHistograma,
   radioPorMagnitud,
   territorioDe,
   topPorMagnitud,
@@ -392,6 +393,7 @@ function asegurarSuperficiesFase3() {
       const boton = ev.target.closest("[data-ficha]");
       if (boton) abrirFicha(boton.dataset.ficha);
     });
+    seccion.addEventListener("keydown", moverEnHistograma);
     seccion.addEventListener("change", (ev) => {
       if (ev.target.id === "cerca-ciudad") {
         estado.ciudad = ev.target.value;
@@ -442,24 +444,54 @@ function htmlHistograma(visibles) {
   const f = estado.filtro;
   const barras = histogramaPorAnio(visibles, f.desde, f.hasta);
   const max = Math.max(1, ...barras.map((b) => b.n));
-  const cima = barras.reduce((a, b) => (b.n > a.n ? b : a), barras[0]);
+  const r = resumenHistograma(barras, visibles);
+  const pct = new Intl.NumberFormat(idioma(), { maximumFractionDigits: 1 });
+  const resumen = t("hist.maximo", {
+    total: fmtEntero(r.total),
+    anio: r.cima.anio,
+    n: fmtEntero(r.cima.n),
+    mag: r.magMax === null ? "—" : fmtMag(r.magMax),
+  });
+  // H-13: cada barra es alcanzable con el teclado (tabindex rodante: una sola
+  // parada de tabulador, flechas para recorrer) y anuncia anio, cantidad y porcentaje.
   return `
     <h3 class="${ETIQUETA}">${esc(t("hist.titulo"))}</h3>
-    <div role="img" aria-label="${esc(t("hist.aria", { desde: f.desde, hasta: f.hasta }))}"
-      class="mt-3 flex h-36 items-end gap-px border-b border-trazo">
+    <div id="hist-barras" role="group" aria-label="${esc(t("hist.aria", { desde: f.desde, hasta: f.hasta, resumen }))}"
+      class="mt-3 flex h-36 items-stretch gap-px border-b border-trazo">
       ${barras
-        .map((b) => `<div class="min-w-px flex-1 rounded-t-sm bg-lo" style="height:${(b.n / max) * 100}%" title="${b.anio}: ${b.n}"></div>`)
+        .map((b, i) => {
+          const etiqueta = t("hist.barra", { anio: b.anio, n: fmtEntero(b.n), pct: pct.format(r.porcentajes[i]), desde: f.desde, hasta: f.hasta });
+          const relleno = b.anio === r.cima.anio && b.n > 0 ? "bg-tinta" : "bg-lo";
+          return `<div role="img" tabindex="${i === 0 ? 0 : -1}" data-barra aria-label="${esc(etiqueta)}" title="${esc(`${b.anio}: ${fmtEntero(b.n)}`)}"
+            class="flex min-w-px flex-1 items-end focus-visible:outline-2 focus-visible:outline-hi"><div class="w-full rounded-t-sm ${relleno}" style="height:${(b.n / max) * 100}%"></div></div>`;
+        })
         .join("")}
     </div>
     <div class="mt-1 flex justify-between font-mono text-[0.6875rem] text-lo tabular-nums" aria-hidden="true">
       <span>${f.desde}</span><span>${f.hasta}</span>
     </div>
-    <p class="mt-1 text-[0.75rem] text-lo">${esc(t("hist.maximo", { anio: cima.anio, n: fmtEntero(cima.n) }))}</p>
+    <p class="mt-1 text-[0.75rem] text-lo">${esc(resumen)}</p>
+    <p class="mt-1 text-[0.6875rem] text-lo max-sm:hidden">${esc(t("hist.teclado"))}</p>
     <table class="sr-only">
       <caption>${esc(t("hist.tabla"))}</caption>
       <thead><tr><th scope="col">${esc(t("hist.anio"))}</th><th scope="col">${esc(t("hist.n"))}</th></tr></thead>
       <tbody>${barras.map((b) => `<tr><td>${b.anio}</td><td>${b.n}</td></tr>`).join("")}</tbody>
     </table>`;
+}
+
+/** Flechas, Inicio y Fin recorren las barras del histograma (tabindex rodante). */
+function moverEnHistograma(ev) {
+  const barra = ev.target.closest?.("[data-barra]");
+  if (!barra) return;
+  const todas = [...barra.parentElement.querySelectorAll("[data-barra]")];
+  const i = todas.indexOf(barra);
+  const destino = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: todas.length - 1 }[ev.key];
+  if (destino === undefined) return;
+  ev.preventDefault();
+  const sig = todas[Math.min(todas.length - 1, Math.max(0, destino))];
+  barra.tabIndex = -1;
+  sig.tabIndex = 0;
+  sig.focus();
 }
 
 function htmlCerca() {
