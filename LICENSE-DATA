@@ -34,51 +34,28 @@ Department of the Interior/USGS". Por eso `CLAUDE.md` (regla 2) hace la
 atribucion obligatoria **para este proyecto** aunque el USGS no la exija: es
 una decision de integridad de fuente, no solo de cumplimiento legal.
 
-### Pendiente de verificar
+### Cierre de la verificacion (Fase 4, 2026-10-26)
 
-No se pudo confirmar, dentro de esta sesion, una pagina especifica de
-terminos de uso o licencia para el **FDSN Event Web Service** o para ComCat
-(el catalogo especifico que se consulta) distinta de la politica general de
-copyright de la agencia citada arriba. La pagina de ComCat
-(https://earthquake.usgs.gov/data/comcat/index.php) no contiene esa
-informacion en su version consultada. Antes de la Fase 4 (Publicacion),
-conviene revisar tambien:
-
-- https://www.usgs.gov/policies-and-notices (enlazada desde la documentacion
-  del servicio FDSN como "Legal")
-- Si existe alguna nota de terminos de uso especifica del servicio web (limite
-  de tasa, uso aceptable) mas alla del limite tecnico de 20 000 resultados por
-  consulta ya documentado en `docs/fases/FASE-1-DATOS.md`.
-
-Esto queda marcado como pendiente en vez de darse por cerrado.
+Se reviso https://www.usgs.gov/policies-and-notices (via WebFetch): es un
+indice de politicas y avisos; **no contiene terminos de uso propios del FDSN
+Event Web Service ni de ComCat**, ni excepciones a la regla general de dominio
+publico para el catalogo de eventos. No se halla otra condicion que la de
+arriba, asi que el regimen vigente es el de la seccion 1: dominio publico con
+credito solicitado. El proyecto respeta ademas el limite tecnico del servicio
+(una consulta diaria desde la GitHub Action; la web no consulta al USGS).
+Si el USGS publicara terminos especificos, este documento se actualiza.
 
 ## 2. Teselas del mapa base
 
-La eleccion final de proveedor de teselas **queda abierta** en
-`docs/adr/ADR-001-leaflet.md` (seccion "Decision abierta"). Lo que si se
-verifico:
+**Este proyecto no usa teselas ni ningun proveedor de mapa base de terceros**
+(ADR-008, aceptado por Luis el 2026-10-21; `TESELAS = null` en
+`src/config.js`). El mapa base son los GeoJSON de `data/` (seccion 3)
+dibujados por Leaflet, sin peticiones a terceros. Por tanto no aplican la
+atribucion "© OpenStreetMap contributors" ni la licencia ODbL.
 
-**Si se usa el servidor por defecto de OpenStreetMap**
-(`tile.openstreetmap.org`), verificado via WebFetch el 2026-09-29 contra
-https://operations.osmfoundation.org/policies/tiles/:
-
-- Atribucion obligatoria y visible: **"© OpenStreetMap contributors"**, sin
-  poder ocultarla ni sacarla de pantalla.
-- Uso limitado a visualizacion interactiva (el patron de este proyecto);
-  prohibida la descarga masiva, el modo sin conexion y los bots.
-- Los datos subyacentes de OpenStreetMap se licencian bajo **ODbL 1.0** (Open
-  Database License), que es *share-alike*: una base de datos derivada de OSM
-  hereda esa obligacion. Este proyecto **no** redistribuye los datos de OSM
-  como base de datos propia — solo consume las teselas renderizadas como
-  imagenes para mostrar el mapa base, que es el uso que cubre la politica de
-  arriba — pero si en el futuro se extrajeran datos vectoriales de OSM (por
-  ejemplo, limites o toponimia, como hizo Orinoco Digital), esa porcion si
-  quedaria bajo ODbL y tendria que mantenerse separada e identificada, igual
-  que en `orinoco-digital` (ver su `LICENSE-DATA`).
-
-**Si en una fase futura se elige un proveedor alternativo** (comercial, con
-capa gratuita, o autoalojado), este documento se actualiza con su licencia y
-sus terminos especificos antes de que ese proveedor entre en produccion.
+Si en el futuro se elige un proveedor de teselas, este documento se actualiza
+con su licencia y terminos **antes** de que entre en produccion (y, si fuera
+OpenStreetMap, con su atribucion visible y la separacion de los datos ODbL).
 
 ## 3. Limites de Venezuela y zona en disputa (desde la Fase 1)
 
@@ -143,7 +120,7 @@ Wikidata en tiempo de ejecucion; los valores estan versionados en el codigo.
 | Catalogo de sismos (USGS FDSN) | Dominio publico (US Government work) | Ninguna legal; atribucion solicitada y aplicada por decision propia |
 | Frontera nacional y zona en disputa (geoBoundaries ADM0 / Natural Earth) | Dominio publico | Ninguna legal; cita aplicada (seccion 3) |
 | Limites estatales (geoBoundaries ADM1, OCHA Venezuela / INE) | CC BY 3.0 IGO | Atribucion e indicacion de cambios (seccion 3) |
-| Teselas de OpenStreetMap (si se usan) | Politica operativa de uso + datos ODbL 1.0 subyacentes | Atribucion visible "© OpenStreetMap contributors"; sin descarga masiva |
+| Teselas de mapa base | No se usan (ADR-008) | Ninguna |
 | Coordenadas de las ciudades del selector (Wikidata, P625) | CC0 1.0 | Ninguna legal; cita aplicada (seccion 4) |
 | Datos originales de este proyecto (curacion, contrato `fuente`/`confianza`/`ultima_verificacion`) | MIT, igual que el codigo — no hay un dataset propio independiente que amerite una licencia de datos separada como CC BY en esta fase | — |
 

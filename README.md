@@ -10,6 +10,10 @@ estadisticas y sismos cerca de una ciudad elegida.
 > **No es un sistema de alerta temprana.** Lee [DISCLAIMER.md](DISCLAIMER.md)
 > — es corto y va en serio.
 
+**Demo / Live demo:** [URL de la demo — pendiente: la publica Luis al desplegar]
+
+<!-- Capturas / GIF: [captura-mapa.png] [captura-estadisticas.png] — pendientes, las provee Luis desde el telefono real -->
+
 ---
 
 ## Español
@@ -22,27 +26,45 @@ actualizados una vez al dia mediante una GitHub Action. La web nunca consulta
 al USGS en tiempo real: lee un archivo `data/eventos.json` versionado y
 estatico.
 
-### Funcionalidades (hoja de ruta)
+### Funcionalidades
 
-1. Mapa con circulos por magnitud, color por profundidad.
-2. Deslizador de tiempo y filtro por magnitud.
-3. Histograma por año y top 10 de mayor magnitud.
-4. "Cerca de mi ciudad": radio en km desde una ciudad elegida (sin pedir
-   ubicacion al usuario).
+1. Mapa con circulos por magnitud, color por profundidad (sin teselas de terceros).
+2. Deslizador de tiempo y filtro por magnitud; vista por defecto en Venezuela,
+   con la costa (50 km) y la zona en disputa de la Guayana Esequiba
+   claramente etiquetadas.
+3. Histograma de sismos por año (con resumen en texto, tabla equivalente y
+   barras navegables con teclado) y top 10 de mayor magnitud.
+4. "Cerca de mi ciudad": radio en km desde una de las 24 capitales de
+   estado; **nunca pide tu ubicacion**.
 5. Ficha del evento con enlace a la pagina oficial del USGS.
+6. Interfaz en español e inglés.
 
-### Estado
+### Que NO es
 
-**Fase 0 — setup.** Repositorio, reglas de trabajo y gobernanza creados.
-Pendiente el STOP gate de esta fase. Ver [CLAUDE.md](CLAUDE.md) y
-[docs/fases/](docs/fases/) para la hoja de ruta completa.
+No es alerta temprana ni prediccion, no es una fuente oficial y no esta
+afiliado al USGS ni a FUNVISIS. Sus cifras pueden diferir de las de FUNVISIS.
+Detalle en [DISCLAIMER.md](DISCLAIMER.md).
 
 ### Stack
 
 Vite + JavaScript ES6 (modulos nativos) + Leaflet + Tailwind CSS. Datos:
-GeoJSON del USGS, descargados por una GitHub Action diaria. i18n ES/EN. Ver
-[docs/adr/ADR-001-leaflet.md](docs/adr/ADR-001-leaflet.md) para la eleccion
-del motor de mapa.
+GeoJSON del USGS, descargados por una GitHub Action diaria. Despliegue
+estatico. Ver [docs/adr/](docs/adr/) para las decisiones (p. ej.
+[ADR-001](docs/adr/ADR-001-leaflet.md) y [ADR-002](docs/adr/ADR-002-static-first.md)).
+
+### Arrancar en local
+
+Necesitas Node 22 o superior.
+
+```bash
+git clone https://github.com/lifelece/sismos-ve.git
+cd sismos-ve
+npm ci
+npm run dev        # servidor de desarrollo
+npm test           # pruebas
+npm run build      # build de produccion en dist/
+npm run dev:host   # para probar en el telefono por la red local
+```
 
 ### Documentacion
 
@@ -52,19 +74,35 @@ del motor de mapa.
 | [docs/fases/](docs/fases/) | Guion operativo de cada fase |
 | [docs/adr/](docs/adr/) | Decisiones de arquitectura (una por archivo) |
 | [DISCLAIMER.md](DISCLAIMER.md) | Aviso: no es alerta temprana; USGS vs FUNVISIS |
-| [LICENSE-DATA](LICENSE-DATA) | Regimen de los datos del USGS y de las teselas del mapa |
+| [LICENSE-DATA](LICENSE-DATA) | Regimen de cada dato y atribuciones |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Como contribuir y reportar un dato incorrecto |
+
+### Atribuciones
+
+- **Sismos:** U.S. Geological Survey (USGS), dominio publico, FDSN Event Web
+  Service — [earthquake.usgs.gov](https://earthquake.usgs.gov/).
+- **Frontera nacional:** geoBoundaries gbOpen ADM0 (origen Natural Earth),
+  dominio publico. **Limites estatales:** geoBoundaries ADM1 (OCHA Venezuela /
+  INE), CC BY 3.0 IGO, geometria simplificada (Runfola et al., 2020, *PLoS ONE*
+  15(4): e0231866).
+- **Zona en disputa y paises vecinos:** Natural Earth, dominio publico
+  ("Made with Natural Earth"). La zona se reproduce con la clasificacion de la
+  fuente; el proyecto no toma posicion.
+- **Coordenadas de las ciudades:** Wikidata (P625), CC0 1.0.
+- **Mapa base:** ninguno de terceros (sin teselas).
+
+Detalle completo en [LICENSE-DATA](LICENSE-DATA).
 
 ### Contribuir
 
-Este proyecto todavia no acepta contribuciones externas: la guia
-`CONTRIBUTING.md` y las plantillas de reporte llegan en la Fase 4
-(Publicacion).
+Se aceptan correcciones de datos con fuente y aportes pequeños. Lee
+[CONTRIBUTING.md](CONTRIBUTING.md) y usa la plantilla *Reportar dato incorrecto*.
 
-### Licencia
+### Licencia y citacion
 
-Codigo bajo [MIT](LICENSE). Los datos siguen el regimen descrito en
-[LICENSE-DATA](LICENSE-DATA): el catalogo del USGS es dominio publico, con
-atribucion aplicada por decision propia del proyecto.
+Codigo bajo [MIT](LICENSE). Los datos conservan su licencia de origen
+([LICENSE-DATA](LICENSE-DATA)). Para citar este proyecto usa
+[CITATION.cff](CITATION.cff).
 
 ---
 
@@ -77,38 +115,46 @@ using the USGS public catalog (FDSN Event Web Service), refreshed once a day
 via a GitHub Action. The website never queries USGS at runtime: it reads a
 versioned, static `data/eventos.json` file.
 
-### Planned features
+### Features
 
-1. Map with circles sized by magnitude, colored by depth.
-2. Time slider and magnitude filter.
-3. Yearly histogram and top-10 largest earthquakes.
-4. "Near my city": radius in km from a chosen city (never requests the
-   user's location).
-5. Event detail card linking to the official USGS event page.
+1. Map with circles sized by magnitude and colored by depth (no third-party tiles).
+2. Time slider and magnitude filter; Venezuela by default, with the 50 km
+   coastal strip and the disputed Guayana Esequiba zone clearly labeled.
+3. Yearly histogram (with a text summary, an equivalent table and
+   keyboard-navigable bars) and a top 10 by magnitude.
+4. "Near my city": radius in km from one of 24 state capitals; **it never
+   asks for your location**.
+5. Event card linking to the official USGS event page.
+6. Spanish and English UI.
 
-### Status
+### What it is not
 
-**Phase 0 — setup.** Repository, working rules, and governance files
-created. This phase's STOP gate is pending approval. See
-[CLAUDE.md](CLAUDE.md) and [docs/fases/](docs/fases/) for the full roadmap.
+Not an early-warning or prediction system, not an official source, and not
+affiliated with USGS or FUNVISIS. Figures may differ from FUNVISIS. See
+[DISCLAIMER.md](DISCLAIMER.md).
 
-### Stack
+### Stack and local setup
 
-Vite + vanilla ES6 JavaScript + Leaflet + Tailwind CSS. Data: USGS GeoJSON,
-fetched by a daily GitHub Action. ES/EN i18n. See
-[docs/adr/ADR-001-leaflet.md](docs/adr/ADR-001-leaflet.md) for the map
-engine decision.
+Vite + vanilla ES6 JavaScript + Leaflet + Tailwind CSS; static deployment.
+Requires Node 22+: `npm ci`, then `npm run dev`, `npm test`, `npm run build`
+(see the commands above). Decisions are in [docs/adr/](docs/adr/).
 
-### Contributing
+### Attributions
 
-This project does not accept external contributions yet: `CONTRIBUTING.md`
-and the report templates arrive in Phase 4 (Publication).
+- **Earthquakes:** U.S. Geological Survey (USGS), public domain.
+- **National border:** geoBoundaries gbOpen ADM0 (Natural Earth origin), public
+  domain. **State boundaries:** geoBoundaries ADM1 (OCHA Venezuela / INE),
+  CC BY 3.0 IGO, simplified geometry (Runfola et al., 2020).
+- **Disputed zone and neighboring countries:** Natural Earth, public domain.
+  The project takes no position on the dispute.
+- **City coordinates:** Wikidata (P625), CC0 1.0.
+- **Base map:** no third-party tiles.
 
-### License
+### Contributing, license and citation
 
-Code under [MIT](LICENSE). Data follows the regime described in
-[LICENSE-DATA](LICENSE-DATA): the USGS catalog is public domain, with
-attribution applied as the project's own editorial choice.
+Source-backed data corrections are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
+Code under [MIT](LICENSE); data keeps its original license
+([LICENSE-DATA](LICENSE-DATA)). Cite with [CITATION.cff](CITATION.cff).
 
 ---
 

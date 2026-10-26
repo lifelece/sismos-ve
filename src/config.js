@@ -98,7 +98,7 @@ export const MAX_RESULTADOS = 8;
 export const ENLACES = Object.freeze({
   usgs: "https://earthquake.usgs.gov/",
   fdsn: "https://earthquake.usgs.gov/fdsnws/event/1/",
-  repo: null,
+  repo: "https://github.com/lifelece/sismos-ve",
 });
 
 /** Filas del top por magnitud (Fase 3, ficha del proyecto: "top 10"). */
