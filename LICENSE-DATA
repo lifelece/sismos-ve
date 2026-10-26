@@ -119,6 +119,23 @@ soberania: la zona en disputa se reproduce con la clasificacion que le da
 Natural Earth, y la frontera de geoBoundaries sigue la linea administrada de
 facto. El proyecto no toma posicion (regla 9 de `CLAUDE.md`).
 
+## 4. Coordenadas de las ciudades (desde la Fase 3)
+
+La lista de "Cerca de mi ciudad" (`CIUDADES` en `src/config.js`) son las 23
+capitales de estado de Venezuela mas Caracas (Distrito Capital), decision de
+Luis del 2026-10-26. La Guayana Esequiba no entra en la lista (zona en
+disputa, trato aparte).
+
+| Contenido | Fuente | Licencia | Obligacion |
+|---|---|---|---|
+| lat/lon de cada ciudad (4 decimales) | [Wikidata](https://www.wikidata.org/), propiedad P625 (coordinate location) del item de la capital; el QID de cada una esta en `CIUDADES` y se verifica en `https://www.wikidata.org/wiki/<QID>` | CC0 1.0 | Ninguna (cita aplicada: enlace en la interfaz) |
+
+Consulta unica el 2026-10-26: SPARQL (capitales, P36, de los estados de
+Venezuela) y `Special:EntityData` para Barcelona (Q391221) y Caracas (Q1533).
+En Trujillo (Q1020535) y San Fernando de Apure (Q990764) Wikidata trae dos
+coordenadas que difieren menos de 1 km: se tomo la primera. La web no consulta
+Wikidata en tiempo de ejecucion; los valores estan versionados en el codigo.
+
 ## Resumen
 
 | Dato | Licencia / regimen | Obligacion |
@@ -127,6 +144,7 @@ facto. El proyecto no toma posicion (regla 9 de `CLAUDE.md`).
 | Frontera nacional y zona en disputa (geoBoundaries ADM0 / Natural Earth) | Dominio publico | Ninguna legal; cita aplicada (seccion 3) |
 | Limites estatales (geoBoundaries ADM1, OCHA Venezuela / INE) | CC BY 3.0 IGO | Atribucion e indicacion de cambios (seccion 3) |
 | Teselas de OpenStreetMap (si se usan) | Politica operativa de uso + datos ODbL 1.0 subyacentes | Atribucion visible "© OpenStreetMap contributors"; sin descarga masiva |
+| Coordenadas de las ciudades del selector (Wikidata, P625) | CC0 1.0 | Ninguna legal; cita aplicada (seccion 4) |
 | Datos originales de este proyecto (curacion, contrato `fuente`/`confianza`/`ultima_verificacion`) | MIT, igual que el codigo — no hay un dataset propio independiente que amerite una licencia de datos separada como CC BY en esta fase | — |
 
 **El codigo fuente se licencia por separado bajo MIT.** Ver [LICENSE](LICENSE).

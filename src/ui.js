@@ -11,16 +11,32 @@ import { cambiarIdioma, idioma, t } from "./i18n/index.js";
 import * as puente from "./puenteMapa.js";
 import {
   ampliarFiltroPara,
+  cercaDeCiudad,
   claseProfundidad,
+  enlaceUsgs,
   fechaUTC,
   filtrarEventos,
   filtroInicial,
+  histogramaPorAnio,
   radioPorMagnitud,
   territorioDe,
+  topPorMagnitud,
 } from "./data.js";
 import { buscar, crearIndice } from "./buscar.js";
 import { frescura, textoRelativo } from "./frescura.js";
-import { ENLACES, FRESCURA, MAGNITUD_MINIMA, PROFUNDIDAD, TABLA_PAGINA } from "./config.js";
+import {
+  CERCA_LISTA,
+  CIUDADES,
+  CIUDADES_FUENTE,
+  CIUDAD_POR_DEFECTO,
+  ENLACES,
+  FRESCURA,
+  MAGNITUD_MINIMA,
+  PROFUNDIDAD,
+  RADIO_CERCA,
+  TABLA_PAGINA,
+  TOP_N,
+} from "./config.js";
 
 const estado = {
   /** @type {ReturnType<typeof import("./data.js").normalizarColeccion>|null} */
@@ -36,6 +52,9 @@ const estado = {
   mapaListo: false,
   resultados: [],
   activo: -1,
+  /** "Cerca de mi ciudad" (Fase 3): id de CIUDADES y radio en km. Los elige la persona, nunca se detectan. */
+  ciudad: CIUDAD_POR_DEFECTO,
+  radio: RADIO_CERCA.defecto,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -68,8 +87,10 @@ export function montarUI() {
   $("cabecera").innerHTML = htmlCabecera();
   $("panel").innerHTML = htmlPanel();
   $("aviso").innerHTML = htmlAviso();
+  asegurarSuperficiesFase3();
   pintarCargaMapa();
   pintarTabla();
+  pintarStats();
   conectar();
   pintarResumen();
 }
@@ -119,6 +140,7 @@ function aplicar({ encuadrar = false } = {}) {
   if (encuadrar) puente.encuadrar(estado.filtro.vista);
   pintarResumen();
   if (estado.modo === "tabla") pintarTabla();
+  if (estado.modo === "stats") pintarStats();
 }
 
 function fijarFiltro(cambios, opciones) {
@@ -227,7 +249,7 @@ function htmlPanel() {
       <div class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:pt-3">
         <p id="resumen" class="min-w-0 flex-1 text-[0.8125rem] text-lo" aria-live="polite"></p>
         <div class="flex shrink-0 overflow-hidden rounded-md border border-trazo" role="group" aria-label="${esc(t("modo.etiqueta"))}">
-          ${segmento("mapa")}${segmento("tabla")}
+          ${segmento("mapa")}${segmento("tabla")}${segmento("stats")}
         </div>
         <button id="alternar-panel" type="button" aria-expanded="${abierto}" aria-controls="controles"
           class="h-9 shrink-0 rounded-md border border-trazo px-3 text-[0.8125rem] text-lo hover:text-hi sm:hidden">
@@ -328,12 +350,11 @@ function htmlAviso() {
     </form>`;
 }
 
-/** Ventana del evento en el mapa (la ficha completa llega en la Fase 3). */
-function htmlVentana(e) {
+/** Cabecera (magnitud, lugar) y filas de datos de un evento: la comparten la ventana del mapa y la ficha. */
+function htmlDatosEvento(e, { id = false } = {}) {
   const territorio = territorioDe(e);
   const fila = (k, v) => `<div class="contents"><dt class="text-lo">${esc(k)}</dt><dd class="text-hi">${v}</dd></div>`;
   return `
-    <div class="ventana">
       <p class="font-mono text-[1.25rem] font-bold text-hi tabular-nums">M ${fmtMag(e.mag)}
         <span class="text-[0.75rem] font-normal text-lo">${esc(e.magTipo ?? "")}</span></p>
       <p class="mt-0.5 text-[0.8125rem] text-hi">${esc(e.lugar)}</p>
@@ -343,9 +364,204 @@ function htmlVentana(e) {
         ${fila(t("evento.profundidad"), `${esc(fmtKm(e.prof))} km · ${esc(t(`profundidad.${claseProfundidad(e.prof).clave}.corta`))}`)}
         ${fila(t("evento.territorio"), esc(t(`territorio.${territorio}`)))}
         ${fila(t("evento.confianza"), esc(t(`confianza.${e.confianza}`)))}
-      </dl>
-      ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-block text-[0.75rem] text-tinta underline">${esc(t("evento.usgs"))}</a>` : ""}
+        ${id ? fila(t("ficha.id"), `<span class="font-mono">${esc(e.id)}</span>`) : ""}
+      </dl>`;
+}
+
+/** Ventana del evento en el mapa (la ficha completa es el dialogo #ficha). */
+function htmlVentana(e) {
+  const enlace = enlaceUsgs(e);
+  return `
+    <div class="ventana">
+      ${htmlDatosEvento(e)}
+      ${enlace ? `<a href="${esc(enlace)}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-block text-[0.75rem] text-tinta underline">${esc(t("evento.usgs"))}</a>` : ""}
     </div>`;
+}
+
+// --- Estadisticas y ficha del evento (Fase 3) ----------------------------------------
+
+/** Crea (una vez) la seccion #stats y el dialogo #ficha; sobreviven al cambio de idioma. */
+function asegurarSuperficiesFase3() {
+  if (!$("stats")) {
+    const seccion = document.createElement("section");
+    seccion.id = "stats";
+    seccion.className = "absolute inset-0 z-[1000] overflow-y-auto bg-shell";
+    seccion.hidden = true;
+    $("vista").appendChild(seccion);
+    seccion.addEventListener("click", (ev) => {
+      const boton = ev.target.closest("[data-ficha]");
+      if (boton) abrirFicha(boton.dataset.ficha);
+    });
+    seccion.addEventListener("change", (ev) => {
+      if (ev.target.id === "cerca-ciudad") {
+        estado.ciudad = ev.target.value;
+        pintarCerca();
+      }
+    });
+    seccion.addEventListener("input", (ev) => {
+      if (ev.target.id === "cerca-radio") {
+        estado.radio = Number(ev.target.value);
+        $("cerca-radio-salida").textContent = `${fmtEntero(estado.radio)} km`;
+        pintarCerca();
+      }
+    });
+  }
+  if (!$("ficha")) {
+    const dialogo = document.createElement("dialog");
+    dialogo.id = "ficha";
+    dialogo.setAttribute("aria-labelledby", "ficha-titulo");
+    document.body.appendChild(dialogo);
+    dialogo.addEventListener("click", (ev) => {
+      if (ev.target === dialogo) dialogo.close(); // clic en el fondo
+      if (ev.target.closest("[data-cerrar]")) dialogo.close();
+      const ver = ev.target.closest("[data-ver-mapa]");
+      if (ver) {
+        const e = eventoPorId(ver.dataset.verMapa);
+        dialogo.close();
+        if (e) irAEvento(e);
+      }
+    });
+  }
+}
+
+const eventoPorId = (id) => estado.coleccion?.eventos.find((e) => e.id === id);
+
+/** Fila tocable (>= 44 px) que abre la ficha de un evento. `extra` es HTML ya escapado. */
+function htmlFilaEvento(e, extra = "") {
+  return `
+    <li><button type="button" data-ficha="${esc(e.id)}" aria-label="${esc(t("ficha.abrir"))}: M ${fmtMag(e.mag)}, ${esc(e.lugar)}, ${e.anio}"
+      class="flex min-h-11 w-full items-center gap-2.5 rounded-md border border-trazo px-3 py-1.5 text-left hover:border-tinta">
+      <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background:${claseProfundidad(e.prof).color}" aria-hidden="true"></span>
+      <span class="w-9 shrink-0 font-mono text-[0.8125rem] text-hi tabular-nums">${fmtMag(e.mag)}</span>
+      <span class="line-clamp-2 min-w-0 flex-1 text-[0.8125rem] leading-snug text-hi">${esc(e.lugar)}</span>
+      <span class="shrink-0 text-right font-mono text-[0.6875rem] text-lo tabular-nums">${extra || e.anio}</span>
+    </button></li>`;
+}
+
+function htmlHistograma(visibles) {
+  const f = estado.filtro;
+  const barras = histogramaPorAnio(visibles, f.desde, f.hasta);
+  const max = Math.max(1, ...barras.map((b) => b.n));
+  const cima = barras.reduce((a, b) => (b.n > a.n ? b : a), barras[0]);
+  return `
+    <h3 class="${ETIQUETA}">${esc(t("hist.titulo"))}</h3>
+    <div role="img" aria-label="${esc(t("hist.aria", { desde: f.desde, hasta: f.hasta }))}"
+      class="mt-3 flex h-36 items-end gap-px border-b border-trazo">
+      ${barras
+        .map((b) => `<div class="min-w-px flex-1 rounded-t-sm bg-lo" style="height:${(b.n / max) * 100}%" title="${b.anio}: ${b.n}"></div>`)
+        .join("")}
+    </div>
+    <div class="mt-1 flex justify-between font-mono text-[0.6875rem] text-lo tabular-nums" aria-hidden="true">
+      <span>${f.desde}</span><span>${f.hasta}</span>
+    </div>
+    <p class="mt-1 text-[0.75rem] text-lo">${esc(t("hist.maximo", { anio: cima.anio, n: fmtEntero(cima.n) }))}</p>
+    <table class="sr-only">
+      <caption>${esc(t("hist.tabla"))}</caption>
+      <thead><tr><th scope="col">${esc(t("hist.anio"))}</th><th scope="col">${esc(t("hist.n"))}</th></tr></thead>
+      <tbody>${barras.map((b) => `<tr><td>${b.anio}</td><td>${b.n}</td></tr>`).join("")}</tbody>
+    </table>`;
+}
+
+function htmlCerca() {
+  const c = CIUDADES.find((x) => x.id === estado.ciudad) ?? CIUDADES[0];
+  return `
+    <h3 class="${ETIQUETA}">${esc(t("cerca.titulo"))}</h3>
+    <p class="mt-2 text-[0.75rem] leading-snug text-lo">${esc(t("cerca.nota"))}</p>
+    <div class="mt-3">
+      <label for="cerca-ciudad" class="text-[0.8125rem] text-lo">${esc(t("cerca.ciudad"))}</label>
+      <select id="cerca-ciudad" class="mt-1 h-11 w-full rounded-md border border-trazo bg-shell px-3 text-[0.9375rem] text-hi focus:border-tinta focus:outline-none">
+        ${CIUDADES.map(
+          (x) => `<option value="${esc(x.id)}" ${x.id === c.id ? "selected" : ""}>${esc(x.nombre)} · ${esc(x.estado)}</option>`
+        ).join("")}
+      </select>
+    </div>
+    <div class="mt-3">
+      <div class="flex items-baseline justify-between text-[0.8125rem]">
+        <label for="cerca-radio" class="text-lo">${esc(t("cerca.radio"))}</label>
+        <output id="cerca-radio-salida" for="cerca-radio" class="font-mono text-hi tabular-nums">${fmtEntero(estado.radio)} km</output>
+      </div>
+      <input id="cerca-radio" type="range" min="${RADIO_CERCA.min}" max="${RADIO_CERCA.max}" step="${RADIO_CERCA.paso}" value="${estado.radio}"
+        class="mt-1 h-11 w-full cursor-pointer accent-[var(--color-tinta)]" />
+    </div>
+    <div id="cerca-res" class="mt-2" aria-live="polite"></div>
+    <p class="mt-3 text-[0.6875rem] text-lo">${esc(t("cerca.fuente"))}<a href="${CIUDADES_FUENTE.url}" target="_blank" rel="noopener noreferrer"
+      class="text-tinta underline">${esc(CIUDADES_FUENTE.nombre)}</a> (${esc(CIUDADES_FUENTE.licencia)})</p>`;
+}
+
+/** Repinta solo el resultado de "Cerca de mi ciudad" (el deslizador conserva el foco). */
+function pintarCerca() {
+  const nodo = $("cerca-res");
+  if (!nodo) return;
+  const c = CIUDADES.find((x) => x.id === estado.ciudad) ?? CIUDADES[0];
+  const cerca = cercaDeCiudad(estado.visibles, c, estado.radio);
+  const params = { n: fmtEntero(cerca.length), radio: fmtEntero(estado.radio), ciudad: c.nombre };
+  if (!cerca.length) {
+    nodo.innerHTML = `<p class="text-[0.8125rem] text-hi">${esc(t("cerca.ninguno", params))}</p>`;
+    return;
+  }
+  const lista = cerca.slice(0, CERCA_LISTA);
+  nodo.innerHTML = `
+    <p class="text-[0.8125rem] text-hi">${esc(t(cerca.length === 1 ? "cerca.resumen1" : "cerca.resumen", params))}</p>
+    <p class="mt-1 text-[0.75rem] text-lo">${esc(t("cerca.recientes", { n: lista.length }))}</p>
+    <ul class="mt-2 space-y-1.5">${lista
+      .map(({ evento, km }) => htmlFilaEvento(evento, `${esc(t("cerca.km", { km: fmtEntero(Math.round(km)) }))}<br>${evento.anio}`))
+      .join("")}</ul>`;
+}
+
+/** Histograma, top y "cerca de mi ciudad" sobre los eventos visibles con el filtro actual. */
+function pintarStats() {
+  const nodo = $("stats");
+  if (!nodo) return;
+  nodo.hidden = estado.modo !== "stats";
+  if (estado.modo !== "stats" || !estado.coleccion) return;
+  const visibles = estado.visibles;
+  const seccion = "border-t border-trazo px-4 py-4";
+  nodo.innerHTML = `
+    <div class="mx-auto max-w-2xl">
+      <div class="px-4 pt-4">
+        <h2 class="text-[1.125rem] font-bold text-hi">${esc(t("stats.titulo"))}</h2>
+        <p class="mt-1 text-[0.75rem] leading-snug text-lo">${esc(t("stats.nota", { n: fmtEntero(visibles.length) }))}</p>
+      </div>
+      ${
+        visibles.length
+          ? `<section class="${seccion} mt-4">${htmlHistograma(visibles)}</section>
+      <section class="${seccion}">
+        <h3 class="${ETIQUETA}">${esc(t("top.titulo", { n: TOP_N }))}</h3>
+        <p class="mt-2 text-[0.75rem] text-lo">${esc(t("top.nota"))}</p>
+        <ol class="mt-3 space-y-1.5">${topPorMagnitud(visibles, TOP_N).map((e) => htmlFilaEvento(e)).join("")}</ol>
+      </section>`
+          : `<p class="px-4 py-6 text-[0.8125rem] text-lo">${esc(t("stats.vacio"))}</p>`
+      }
+      <section class="${seccion} pb-8">${htmlCerca()}</section>
+    </div>`;
+  pintarCerca();
+}
+
+/** Ficha del evento: datos, enlace a la pagina oficial del USGS y salto al mapa. */
+function abrirFicha(id) {
+  const e = eventoPorId(id);
+  const dialogo = $("ficha");
+  if (!e || !dialogo) return;
+  const enlace = enlaceUsgs(e);
+  dialogo.innerHTML = `
+    <div class="space-y-3 p-5">
+      <h2 id="ficha-titulo" class="${ETIQUETA}">${esc(t("ficha.titulo"))}</h2>
+      <div>${htmlDatosEvento(e, { id: true })}</div>
+      <p class="text-[0.75rem] leading-snug text-lo">${esc(t("ficha.funvisis"))}</p>
+      <div class="flex flex-wrap gap-2 pt-1">
+        ${
+          enlace
+            ? `<a href="${esc(enlace)}" target="_blank" rel="noopener noreferrer"
+                class="inline-flex min-h-11 items-center rounded-md border border-tinta px-4 text-[0.8125rem] text-tinta">${esc(t("evento.usgs"))}</a>`
+            : `<p class="text-[0.75rem] text-lo">${esc(t("ficha.sinEnlace"))}</p>`
+        }
+        <button type="button" data-ver-mapa="${esc(e.id)}"
+          class="min-h-11 rounded-md border border-trazo px-4 text-[0.8125rem] text-hi hover:border-tinta">${esc(t("ficha.verMapa"))}</button>
+        <button type="button" data-cerrar
+          class="min-h-11 rounded-md border border-trazo px-4 text-[0.8125rem] text-lo hover:text-hi">${esc(t("ficha.cerrar"))}</button>
+      </div>
+    </div>`;
+  dialogo.showModal();
 }
 
 // --- Resumen, carga y tabla ------------------------------------------------------
@@ -440,6 +656,7 @@ function fijarModo(modo) {
     b.classList.toggle("text-lo", !activo);
   }
   pintarTabla();
+  pintarStats();
   if (modo === "mapa") puente.redimensionar();
 }
 
