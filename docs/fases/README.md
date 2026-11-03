@@ -11,7 +11,7 @@ para Claude Code, criterios de salida y STOP gate.
 | 1 — Datos | [FASE-1-DATOS.md](FASE-1-DATOS.md) | Cerrada (Luis) |
 | 2 — Mapa + filtros | [FASE-2-MAPA-FILTROS.md](FASE-2-MAPA-FILTROS.md) | Cerrada (Luis; PR #1 mergeado 2026-10-22) |
 | 3 — Estadisticas | [FASE-3-ESTADISTICAS.md](FASE-3-ESTADISTICAS.md) | Cerrada (Luis, PR #3, 2026-10-26) |
-| 4 — Publicacion | [FASE-4-PUBLICACION.md](FASE-4-PUBLICACION.md) | **En revision** — rama `f4-publicacion`, esperando el STOP gate |
+| 4 — Publicacion | [FASE-4-PUBLICACION.md](FASE-4-PUBLICACION.md) | Cerrada (Luis, PR #4, 2026-10-26) |
 
 ## La regla del STOP gate
 
