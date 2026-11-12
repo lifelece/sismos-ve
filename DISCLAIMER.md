@@ -45,8 +45,6 @@ revisan y se aplican.
 
 ### Sobre la seccion "Patrones" (estadistica del catalogo pasado)
 
-> PROPUESTA de texto: pendiente de aprobacion de Luis en el PR.
-
 La seccion "Patrones" del panel de estadisticas es una **descripcion
 estadistica del catalogo pasado** (1990 hasta la fecha del catalogo). **No
 predice sismos**: no estima cuando, donde ni de que tamano ocurrira ninguno, y
@@ -120,8 +118,6 @@ source, a confidence level, and the date this project last verified it.
 source are reviewed and applied.
 
 ### About the "Patterns" section (statistics of the past catalog)
-
-> PROPOSED text: pending Luis's approval in the PR.
 
 The "Patterns" section of the statistics panel is a **statistical description
 of the past catalog** (1990 up to the catalog date). It **does not predict

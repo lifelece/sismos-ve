@@ -4,7 +4,7 @@
 
 > Spec 001-ml-sismos, tarea T01. Este borrador verifica cada formula y constante de `plan.md` §3.3
 > **solo contra fuentes de acceso abierto**. Tres puntos quedan DIFERENTE o NO VERIFICADO, por lo
-> que **T01 se detiene y se pregunta a Luis antes de T03-T05** (ver "Decisiones pendientes").
+> que T01 se detuvo y se pregunto a Luis antes de T03-T05; **Luis resolvio las tres el 2026-11-08** (ver "Decisiones pendientes").
 > T06 (2026-11-12) completo este ADR con `epsKm` y `minPts` calibrados (seccion "Calibracion T06").
 
 ## Contexto
@@ -181,7 +181,7 @@ usar 2,3 como lo publica la fuente; desempate de MAXC al bin mas bajo; N_MIN = 5
 
 ## Calibracion T06 (epsKm y minPts, 2026-11-12)
 
-Entrada: catalogo real `data/eventos.json` (4358 eventos) tras el declustering GK; a la agrupacion entran los
+Entrada: catalogo real `data/eventos.json` (4360 eventos) tras el declustering GK; a la agrupacion entran los
 superficiales de fondo y todos los intermedios y profundos (RF-7). **No se calculo ni se miro b** en ningun momento.
 
 - Regla fijada antes de ver el resultado: k = minPts = 10; `epsKm` = rodilla (maxima distancia a la cuerda entre el primer

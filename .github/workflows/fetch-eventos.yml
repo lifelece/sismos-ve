@@ -34,7 +34,6 @@ jobs:
     timeout-minutes: 20
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PATRONES_RESULTADO: ${{ steps.patrones.outcome }}
       RAMA: datos-diario
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +60,9 @@ jobs:
       - name: Tests
         run: npm test
       - name: Commit en la rama datos-diario y PR
+        env:
+          # El contexto `steps` solo existe a nivel de paso, no en el `env` del job.
+          PATRONES_RESULTADO: ${{ steps.patrones.outcome }}
         run: |
           if [ -z "$(git status --porcelain -- data/eventos.json)" ]; then
             echo "Sin cambios en data/eventos.json: no hay PR."
