@@ -111,5 +111,8 @@
   "ficha.cerrar": "Cerrar",
   "ficha.sinEnlace": "Este evento no trae enlace a su página del USGS.",
   "ficha.funvisis": "Cifras del USGS; FUNVISIS puede publicar otras para el mismo evento. No es alerta temprana.",
-  "ficha.abrir": "Ver ficha"
+  "ficha.abrir": "Ver ficha",
+  "patrones.b": "b = {b} (IC 95 %: {bLo}–{bHi}) · Mc {mc} (IC 95 %: {mcLo}–{mcHi}) · {familia} · n = {n}",
+  "patrones.bInsuficiente": "Valor b: muestra insuficiente (n = {n} < {nMin})",
+  "patrones.bInconsistente": "Valor b: intervalo inconsistente"
 }

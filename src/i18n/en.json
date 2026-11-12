@@ -111,5 +111,8 @@
   "ficha.cerrar": "Close",
   "ficha.sinEnlace": "This event has no link to its USGS page.",
   "ficha.funvisis": "Figures from the USGS; FUNVISIS may publish different ones for the same event. Not an early warning system.",
-  "ficha.abrir": "View details"
+  "ficha.abrir": "View details",
+  "patrones.b": "b = {b} (95 % CI: {bLo}–{bHi}) · Mc {mc} (95 % CI: {mcLo}–{mcHi}) · {familia} · n = {n}",
+  "patrones.bInsuficiente": "b value: insufficient sample (n = {n} < {nMin})",
+  "patrones.bInconsistente": "b value: inconsistent interval"
 }

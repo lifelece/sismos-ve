@@ -19,6 +19,7 @@
     "data:patrones": "node scripts/analizar-patrones.mjs",
     "data:validate-patrones": "node scripts/validate-patrones.mjs",
     "data:etiquetar": "node scripts/etiquetar-eventos.mjs",
+    "medir:js": "node scripts/medir-js.mjs",
     "verificar:modulos": "node scripts/verificar-modulos.mjs"
   },
   "dependencies": {
