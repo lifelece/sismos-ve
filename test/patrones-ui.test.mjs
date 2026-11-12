@@ -8,22 +8,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { formatoNumero, formatoB, zonasVisibles, coincideConCatalogo, ordenarZonas, nMinDe } from "../src/patrones.js";
 import { interpolar } from "../src/i18n/interpolar.js";
+const leer = (f) => JSON.parse(readFileSync(new URL(`../src/i18n/${f}`, import.meta.url), "utf8"));
+const DIC = { es: leer("es.json"), en: leer("en.json") };
 
-// T09: plantillas provisionales; T10 las sustituye por src/i18n/*.json reales.
-const DIC = {
-  es: {
-    "patrones.b": "b = {b} (IC 95 %: {bLo}–{bHi}) · Mc {mc} (IC 95 %: {mcLo}–{mcHi}) · {familia} · n = {n}",
-    "patrones.bInsuficiente": "Valor b: muestra insuficiente (n = {n} < {nMin})",
-    "patrones.bInconsistente": "Valor b: intervalo inconsistente",
-    "patrones.sinZonas": "Ninguna zona tiene al menos la mitad de sus eventos en esta vista.",
-  },
-  en: {
-    "patrones.b": "b = {b} (95 % CI: {bLo}–{bHi}) · Mc {mc} (95 % CI: {mcLo}–{mcHi}) · {familia} · n = {n}",
-    "patrones.bInsuficiente": "b value: insufficient sample (n = {n} < {nMin})",
-    "patrones.bInconsistente": "b value: inconsistent interval",
-    "patrones.sinZonas": "No zone has at least half of its events in this view.",
-  },
-};
 const tDe = (idioma) => (clave, params) => interpolar(DIC[idioma][clave] ?? clave, params);
 
 const gr = (extra = {}) => ({
@@ -90,4 +77,48 @@ test("coincideConCatalogo: falso si cambia catalogo_n o ultima_verificacion o fa
 test("nMinDe lee N_MIN del archivo real", () => {
   const real = JSON.parse(readFileSync(new URL("../data/patrones.json", import.meta.url), "utf8"));
   assert.equal(nMinDe(real), 50);
+});
+
+// --- T10: lista prohibida (RF-2, plan 3.6) ------------------------------------------
+const RAICES = {
+  es: ["riesg", "peligr", "amenaz", "alert", "predic", "predec", "predij", "pronostic", "probab", "inminent", "venider", "pront", "proxim", "futur", "esperad", "estable", "inestable", "segur", "activ", "propens", "tendenc", "recurren"],
+  en: ["risk", "hazard", "danger", "threat", "alert", "predict", "forecast", "probab", "likel", "imminent", "soon", "next", "upcoming", "futur", "expect", "stable", "unstable", "safe", "activ", "prone", "trend", "recurren"],
+};
+const EXCEPCIONES = ["likelihood", "establec"];
+const palabras = (texto) =>
+  texto.toLowerCase().normalize("NFD").replace(/\p{M}+/gu, "").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+const saltan = (texto) => {
+  const todas = [...RAICES.es, ...RAICES.en];
+  return palabras(texto).filter((w) => todas.some((r) => w.startsWith(r)) && !EXCEPCIONES.some((e) => w.startsWith(e)));
+};
+
+test("lista prohibida: un positivo por raiz salta; los falsos positivos conocidos no", () => {
+  const positivos = [
+    "riesgos", "peligrosa", "amenazas", "alertas", "predicción", "predecimos", "predijo", "pronosticar", "probabilidad", "inminentes", "venideros", "pronto", "próximas", "futura", "esperadas", "estables", "inestable", "seguridad", "activa", "propensa", "tendencia", "recurrencia",
+    "risky", "hazards", "dangerous", "threats", "alerts", "predicted", "forecasting", "probably", "likely", "imminent", "soon", "next", "upcoming", "future", "expected", "stable", "unstable", "safety", "active", "prone", "trends", "recurrent",
+  ];
+  for (const w of positivos) assert.equal(saltan(w).length, 1, w);
+  for (const w of ["Mw", "mb", "ML-Md", "media", "magnitud", "sismicidad", "seismicity", "secuencia", "superficial", "Cepitá", "según", "likelihood", "establecer", "nexus", "sample"]) {
+    assert.deepEqual(saltan(w), [], w);
+  }
+});
+
+test("claves patrones.* de es y en: 0 coincidencias salvo patrones.noPrediccion (RF-2)", () => {
+  for (const idioma of ["es", "en"]) {
+    const claves = Object.keys(DIC[idioma]).filter((k) => k.startsWith("patrones."));
+    assert.ok(claves.length >= 15, `faltan claves patrones.* en ${idioma}`);
+    for (const k of claves.filter((c) => c !== "patrones.noPrediccion")) {
+      assert.deepEqual(saltan(DIC[idioma][k]), [], `${idioma}.${k}`);
+    }
+  }
+});
+
+test("textos obligatorios: no prediccion (RF-15), notas (RF-17, RF-27) y mensajes (RF-20, RF-35)", () => {
+  for (const idioma of ["es", "en"]) {
+    for (const k of ["noPrediccion", "nota", "notaVenezuela", "noDisponible", "sinZonas", "borde"]) {
+      assert.ok(DIC[idioma][`patrones.${k}`], `${idioma}.patrones.${k}`);
+    }
+  }
+  assert.match(DIC.es["patrones.noPrediccion"], /No predice sismos/);
+  assert.match(DIC.en["patrones.noPrediccion"], /does not predict earthquakes/);
 });

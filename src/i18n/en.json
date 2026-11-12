@@ -114,5 +114,22 @@
   "ficha.abrir": "View details",
   "patrones.b": "b = {b} (95 % CI: {bLo}–{bHi}) · Mc {mc} (95 % CI: {mcLo}–{mcHi}) · {familia} · n = {n}",
   "patrones.bInsuficiente": "b value: insufficient sample (n = {n} < {nMin})",
-  "patrones.bInconsistente": "b value: inconsistent interval"
+  "patrones.bInconsistente": "b value: inconsistent interval",
+  "patrones.titulo": "Catalog patterns",
+  "patrones.noPrediccion": "Statistical description of the past catalog. It does not predict earthquakes, and its figures depend on the method used.",
+  "patrones.nota": "These figures do not change with the year and magnitude filters. The view (“Venezuela only” or “Region”) only changes which zones are shown, not their figures.",
+  "patrones.notaVenezuela": "In “Venezuela only”, each zone's figures were computed with all of its events, including those outside the view.",
+  "patrones.noDisponible": "Patterns unavailable: the file is missing or does not match the loaded catalog.",
+  "patrones.sinZonas": "No zone has at least half of its events in this view. The “Region” view shows all of them.",
+  "patrones.sinZonasMetodo": "The method found no zones that pass the sensitivity criterion.",
+  "patrones.zona": "Zone {id}",
+  "patrones.profundidad": "{clase} depth",
+  "patrones.clase.superficial": "shallow",
+  "patrones.clase.intermedio": "intermediate",
+  "patrones.clase.profundo": "deep",
+  "patrones.centro": "Center: {lat}, {lon}",
+  "patrones.lugar": "Most frequent USGS place: {lugar}",
+  "patrones.eventos": "{n} events: {fondo} background, {secuencia} sequence, {noAplica} not applicable",
+  "patrones.periodo": "Period: {desde} to {hasta}",
+  "patrones.borde": "This zone touches the edge of the queried area and may continue beyond it."
 }

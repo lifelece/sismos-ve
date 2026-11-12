@@ -6,10 +6,10 @@
  */
 
 import "./style.css";
-import { leerEventos, leerLimites } from "./api.js";
+import { leerEventos, leerLimites, leerPatrones } from "./api.js";
 import { normalizarColeccion } from "./data.js";
 import { conectarMapa, pintarBase } from "./puenteMapa.js";
-import { atribucionMapa, errorMapa, fijarDatos, marcarMapa, montarUI, mostrarError, registrarAtribucion } from "./ui.js";
+import { atribucionMapa, errorMapa, fijarDatos, fijarPatrones, marcarMapa, montarUI, mostrarError, registrarAtribucion } from "./ui.js";
 
 montarUI();
 
@@ -19,6 +19,9 @@ leerEventos()
     console.error(e);
     mostrarError("datos.error");
   });
+
+// Patrones: sin bloquear el primer pintado; si falta, la seccion dice que no esta disponible.
+leerPatrones().then(fijarPatrones);
 
 leerLimites()
   .then((base) => pintarBase(base))

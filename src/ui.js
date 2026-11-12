@@ -25,6 +25,7 @@ import {
 } from "./data.js";
 import { buscar, crearIndice } from "./buscar.js";
 import { frescura, textoRelativo } from "./frescura.js";
+import { coincideConCatalogo, formatoB, formatoNumero, nMinDe, zonasVisibles } from "./patrones.js";
 import {
   CERCA_LISTA,
   CIUDADES,
@@ -51,6 +52,8 @@ const estado = {
   panelAbierto: false,
   error: null,
   mapaListo: false,
+  /** Patrones del catalogo pasado (spec 001); null = no disponible (RF-20). */
+  patrones: null,
   resultados: [],
   activo: -1,
   /** "Cerca de mi ciudad" (Fase 3): id de CIUDADES y radio en km. Los elige la persona, nunca se detectan. */
@@ -105,6 +108,12 @@ export function fijarDatos(coleccion) {
   $("panel").innerHTML = htmlPanel();
   conectarPanel();
   aplicar({ encuadrar: true });
+}
+
+/** Recibe data/patrones.json (o null si falta); no calcula nada (RF-20). */
+export function fijarPatrones(patrones) {
+  estado.patrones = patrones;
+  pintarStats();
 }
 
 /** Muestra un error de carga sin romper el resto de la interfaz. */
@@ -564,9 +573,51 @@ function pintarStats() {
       </section>`
           : `<p class="px-4 py-6 text-[0.8125rem] text-lo">${esc(t("stats.vacio"))}</p>`
       }
-      <section class="${seccion} pb-8">${htmlCerca()}</section>
+      <section class="${seccion}">${htmlCerca()}</section>
+      <section class="${seccion} pb-8" aria-labelledby="patrones-titulo">${htmlPatrones()}</section>
     </div>`;
   pintarCerca();
+}
+
+/**
+ * Bloque "Patrones" (spec 001): descripcion estadistica del catalogo pasado.
+ * Orden: texto de no prediccion (RF-15) antes de cualquier cifra; sin escala de
+ * color ni orden por valor (RF-3); las cifras no siguen a los filtros (RF-17).
+ */
+function htmlPatrones() {
+  const cabecera = `<h3 id="patrones-titulo" class="${ETIQUETA}">${esc(t("patrones.titulo"))}</h3>`;
+  const aviso = `<p class="mt-2 text-[0.8125rem] leading-snug text-hi">${esc(t("patrones.noPrediccion"))}
+    <a class="text-tinta underline" href="${ENLACES.repo}/blob/main/DISCLAIMER.md" target="_blank" rel="noopener">${esc(t("aviso.completo"))}</a></p>`;
+  const p = estado.patrones;
+  const valido = p && coincideConCatalogo(p, { n: estado.coleccion.eventos.length, verificacion: estado.coleccion.verificacion });
+  if (!valido) return `${cabecera}${aviso}<p class="mt-3 text-[0.75rem] text-lo">${esc(t("patrones.noDisponible"))}</p>`;
+  const vista = estado.filtro.vista;
+  const lang = idioma();
+  const zonas = zonasVisibles(p, vista);
+  const nMin = nMinDe(p);
+  const nota = (clave, margen) => `<p class="${margen} text-[0.75rem] leading-snug text-lo">${esc(t(clave))}</p>`;
+  const notas = nota("patrones.nota", "mt-2") + (vista === "venezuela" ? nota("patrones.notaVenezuela", "mt-1") : "");
+  let cuerpo;
+  if (p.zonas.length === 0) cuerpo = nota("patrones.sinZonasMetodo", "mt-3");
+  else if (zonas.length === 0) cuerpo = nota("patrones.sinZonas", "mt-3");
+  else cuerpo = `<ul class="mt-3 space-y-3">${zonas.map((z) => htmlZonaPatrones(z, lang, nMin)).join("")}</ul>`;
+  return `${cabecera}${aviso}${notas}${cuerpo}`;
+}
+
+function htmlZonaPatrones(z, lang, nMin) {
+  const clase = t(`patrones.clase.${z.clase_profundidad}`);
+  const centro = { lat: formatoNumero(z.centro.lat, 2, lang), lon: formatoNumero(z.centro.lon, 2, lang) };
+  const n = { n: fmtEntero(z.n_eventos), fondo: fmtEntero(z.n_fondo), secuencia: fmtEntero(z.n_secuencia), noAplica: fmtEntero(z.n_no_aplica) };
+  const linea = (texto) => `<p class="text-lo">${esc(texto)}</p>`;
+  return `<li class="break-words rounded-md border border-trazo p-3 text-[0.8125rem] leading-snug">
+      <p class="font-bold text-hi">${esc(t("patrones.zona", { id: z.id }))} · ${esc(t("patrones.profundidad", { clase }))}</p>
+      ${linea(t("patrones.centro", centro))}
+      ${z.lugar_usgs_frecuente ? linea(t("patrones.lugar", { lugar: z.lugar_usgs_frecuente })) : ""}
+      ${linea(t("patrones.eventos", n))}
+      ${linea(t("patrones.periodo", { desde: z.periodo.desde, hasta: z.periodo.hasta }))}
+      ${z.en_borde ? linea(t("patrones.borde")) : ""}
+      <p class="mt-2 text-hi">${esc(formatoB(z, lang, t, nMin))}</p>
+    </li>`;
 }
 
 /** Ficha del evento: datos, enlace a la pagina oficial del USGS y salto al mapa. */
