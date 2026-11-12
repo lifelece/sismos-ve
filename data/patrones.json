@@ -1,0 +1,336 @@
+{
+  "metadata": {
+    "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
+    "ultima_verificacion": "2026-11-11",
+    "atribucion": "Datos: U.S. Geological Survey (USGS), dominio publico",
+    "catalogo_n": 4360,
+    "catalogo_sha256": "76045241bb42df4c7f4a5ec028a1c16811006ac5cc76db173082c9b582d98598",
+    "metodo": {
+      "version": "1",
+      "declustering": "gardner-knopoff-1974",
+      "agrupacion": "dbscan-haversine",
+      "gr": "aki-1965-mle+bootstrap-percentil"
+    },
+    "parametros": {
+      "gutenberg_richter": {
+        "dM": 0.1,
+        "correccionMc": 0.2,
+        "nMin": 50,
+        "B": 1000,
+        "maxDescarte": 0.05,
+        "minEventosRemuestra": 2
+      },
+      "gardner_knopoff": {
+        "kmA": 0.1238,
+        "kmB": 0.983,
+        "umbralMagT": 6.5,
+        "diasAltoA": 0.032,
+        "diasAltoB": 2.7389,
+        "diasBajoA": 0.5409,
+        "diasBajoB": -0.547,
+        "profMaxSuperficial": 70
+      },
+      "sensibilidad": {
+        "factores": [
+          0.8,
+          1.2
+        ],
+        "j_min": 0.75
+      },
+      "agrupacion": {
+        "superficial": {
+          "epsKm": 72,
+          "minPts": 10
+        },
+        "intermedio": {
+          "epsKm": 9,
+          "minPts": 10
+        },
+        "profundo": {
+          "epsKm": 9,
+          "minPts": 10
+        }
+      }
+    },
+    "semilla_base": 1,
+    "filtro_confianza": "ninguno",
+    "n_automatic": 0,
+    "excluidos": 0,
+    "control_aleatorio": {
+      "semillas_por_clase": 20,
+      "grupos_max": 0
+    },
+    "resumen": {
+      "fondo": 1426,
+      "secuencia": 662,
+      "no_aplica": 2272,
+      "sin_zona": 471
+    }
+  },
+  "zonas": [
+    {
+      "id": "I01",
+      "clase_profundidad": "intermedio",
+      "n_eventos": 1427,
+      "n_fondo": 0,
+      "n_secuencia": 0,
+      "n_no_aplica": 1427,
+      "n_en_vista_venezuela": 0,
+      "centro": {
+        "lat": 6.7964,
+        "lon": -73.0103
+      },
+      "caja": [
+        -73.399,
+        6.485,
+        -72.66,
+        7.1274
+      ],
+      "en_borde": false,
+      "lugar_usgs_frecuente": "Cepitá, Colombia",
+      "periodo": {
+        "desde": "1990-01-01",
+        "hasta": "2026-10-13"
+      },
+      "territorio": {
+        "venezuela": 0,
+        "costa": 0,
+        "disputa": 0,
+        "fuera": 1427
+      },
+      "sensibilidad": {
+        "jaccard_min": 0.975
+      },
+      "gutenberg_richter": {
+        "publicado": true,
+        "motivo": null,
+        "familia": "mb",
+        "n_sobre_mc": 338,
+        "mc": 4.5,
+        "mc_ic95": [
+          4.5,
+          4.5
+        ],
+        "b": 2.207,
+        "b_ic95": [
+          2.004,
+          2.408
+        ],
+        "b_sigma_shi_bolt": 0.099
+      },
+      "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
+      "confianza": "media",
+      "ultima_verificacion": "2026-11-11"
+    },
+    {
+      "id": "S01",
+      "clase_profundidad": "superficial",
+      "n_eventos": 26,
+      "n_fondo": 15,
+      "n_secuencia": 11,
+      "n_no_aplica": 0,
+      "n_en_vista_venezuela": 0,
+      "centro": {
+        "lat": 3.9376,
+        "lon": -71.331
+      },
+      "caja": [
+        -71.5392,
+        3.6613,
+        -71.1105,
+        4.2444
+      ],
+      "en_borde": false,
+      "lugar_usgs_frecuente": "Puerto Gaitán, Colombia",
+      "periodo": {
+        "desde": "2014-02-25",
+        "hasta": "2021-05-09"
+      },
+      "territorio": {
+        "venezuela": 0,
+        "costa": 0,
+        "disputa": 0,
+        "fuera": 26
+      },
+      "sensibilidad": {
+        "jaccard_min": 1
+      },
+      "gutenberg_richter": {
+        "publicado": false,
+        "motivo": "muestra_insuficiente",
+        "familia": "mb",
+        "n_sobre_mc": 7,
+        "mc": null,
+        "mc_ic95": null,
+        "b": null,
+        "b_ic95": null,
+        "b_sigma_shi_bolt": null
+      },
+      "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
+      "confianza": "media",
+      "ultima_verificacion": "2026-11-11"
+    },
+    {
+      "id": "S02",
+      "clase_profundidad": "superficial",
+      "n_eventos": 544,
+      "n_fondo": 377,
+      "n_secuencia": 167,
+      "n_no_aplica": 0,
+      "n_en_vista_venezuela": 365,
+      "centro": {
+        "lat": 8.5559,
+        "lon": -71.0045
+      },
+      "caja": [
+        -73.49,
+        4.109,
+        -66.7831,
+        12.998
+      ],
+      "en_borde": true,
+      "lugar_usgs_frecuente": "Carora, Venezuela",
+      "periodo": {
+        "desde": "1990-04-07",
+        "hasta": "2026-09-29"
+      },
+      "territorio": {
+        "venezuela": 332,
+        "costa": 33,
+        "disputa": 0,
+        "fuera": 179
+      },
+      "sensibilidad": {
+        "jaccard_min": 0.853
+      },
+      "gutenberg_richter": {
+        "publicado": true,
+        "motivo": null,
+        "familia": "mb",
+        "n_sobre_mc": 102,
+        "mc": 4.6,
+        "mc_ic95": [
+          4.5,
+          4.7
+        ],
+        "b": 2.161,
+        "b_ic95": [
+          1.791,
+          2.561
+        ],
+        "b_sigma_shi_bolt": 0.187
+      },
+      "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
+      "confianza": "media",
+      "ultima_verificacion": "2026-11-11"
+    },
+    {
+      "id": "I02",
+      "clase_profundidad": "intermedio",
+      "n_eventos": 473,
+      "n_fondo": 0,
+      "n_secuencia": 0,
+      "n_no_aplica": 473,
+      "n_en_vista_venezuela": 431,
+      "centro": {
+        "lat": 10.9022,
+        "lon": -62.3049
+      },
+      "caja": [
+        -62.796,
+        10.514,
+        -61.899,
+        11.411
+      ],
+      "en_borde": false,
+      "lugar_usgs_frecuente": "Güiria, Venezuela",
+      "periodo": {
+        "desde": "1990-02-17",
+        "hasta": "2026-08-27"
+      },
+      "territorio": {
+        "venezuela": 88,
+        "costa": 343,
+        "disputa": 0,
+        "fuera": 42
+      },
+      "sensibilidad": {
+        "jaccard_min": 0.924
+      },
+      "gutenberg_richter": {
+        "publicado": true,
+        "motivo": null,
+        "familia": "ML-Md",
+        "n_sobre_mc": 116,
+        "mc": 3.4,
+        "mc_ic95": [
+          3.2,
+          3.4
+        ],
+        "b": 1.565,
+        "b_ic95": [
+          1.222,
+          1.756
+        ],
+        "b_sigma_shi_bolt": 0.119
+      },
+      "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
+      "confianza": "media",
+      "ultima_verificacion": "2026-11-11"
+    },
+    {
+      "id": "S03",
+      "clase_profundidad": "superficial",
+      "n_eventos": 1419,
+      "n_fondo": 941,
+      "n_secuencia": 478,
+      "n_no_aplica": 0,
+      "n_en_vista_venezuela": 801,
+      "centro": {
+        "lat": 10.8539,
+        "lon": -61.7608
+      },
+      "caja": [
+        -65.808,
+        8.902,
+        -59.5336,
+        12.977
+      ],
+      "en_borde": true,
+      "lugar_usgs_frecuente": "Güiria, Venezuela",
+      "periodo": {
+        "desde": "1990-02-03",
+        "hasta": "2026-10-02"
+      },
+      "territorio": {
+        "venezuela": 150,
+        "costa": 651,
+        "disputa": 0,
+        "fuera": 618
+      },
+      "sensibilidad": {
+        "jaccard_min": 0.991
+      },
+      "gutenberg_richter": {
+        "publicado": true,
+        "motivo": null,
+        "familia": "ML-Md",
+        "n_sobre_mc": 540,
+        "mc": 3.3,
+        "mc_ic95": [
+          3.2,
+          3.5
+        ],
+        "b": 1.405,
+        "b_ic95": [
+          1.277,
+          1.574
+        ],
+        "b_sigma_shi_bolt": 0.052
+      },
+      "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
+      "confianza": "media",
+      "ultima_verificacion": "2026-11-11"
+    }
+  ]
+}

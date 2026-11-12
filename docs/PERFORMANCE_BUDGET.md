@@ -43,3 +43,22 @@ cifra que vale es la del telefono de Luis y, tras publicar, PageSpeed movil.
 JS propio `index`: 48,0 KB sin comprimir, **15,7 KB gzip** (Fase 2: 11,7 KB); con
 `map` (1,3 KB) y `precarga` (0,7 KB), **17,7 KB gzip = 12 % del presupuesto**
 de 150 KB. Sin dependencias nuevas; CSS 4,8 KB gzip.
+
+## Línea base de la spec 001 (patrones), 2026-11-12
+
+Medida con `npm run build && npm run medir:js` sobre `main` antes de tocar `src/`
+(Vite 7.3.7): JS propio **53.255 B sin comprimir, 18.252 B gzip** (`index` 16.341 B,
+`map` 1.261 B, `precarga` 650 B; Leaflet, 41.401 B gzip, no cuenta). Es la constante
+`LINEA_BASE_BYTES` de `scripts/medir-js.mjs`: el script sale con código 1 si el JS
+propio gzip supera línea base + 5 KB (RNF-4) o 150 KB en total.
+
+## Cifras finales de la spec 001 (patrones), 2026-11-12
+
+| Pieza | Antes | Después | Límite |
+|---|---|---|---|
+| JS propio gzip (`index` + `map` + `precarga`, sin Leaflet) | 18.252 B | **20.191 B** (+1.939 B) | línea base + 5 KB = 23.372 B (RNF-4); 150 KB total |
+| JS propio sin comprimir | 53.255 B | 59.343 B | — |
+| `data/patrones.json` | — | **7.620 B** sin comprimir, 1.788 B gzip | 50 KB (RNF-3) |
+
+Medido con `npm run build && npm run medir:js` (sale con 0). El análisis completo sobre
+el catálogo real tarda 0,6 s (RNF-2: ≤ 120 s) y `npm test` completo ~1,4 s (RNF-5: ≤ 30 s).

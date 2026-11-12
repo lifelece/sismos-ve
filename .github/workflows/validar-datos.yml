@@ -40,5 +40,7 @@ jobs:
           node-version: 24
       - name: Validar data/eventos.json (contrato, region, JSON)
         run: node scripts/validate-eventos.mjs
+      - name: Validar data/patrones.json (esquema cerrado, IC; avisos si esta desactualizado)
+        run: node scripts/validate-patrones.mjs
       - name: Tests (validador y mapeo FDSN -> contrato)
         run: npm test

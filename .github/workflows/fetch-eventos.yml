@@ -47,9 +47,22 @@ jobs:
           cat "$RUNNER_TEMP/informe.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Validar data/eventos.json (contrato, region, JSON)
         run: node scripts/validate-eventos.mjs
+      # Patrones (spec 001, RF-26): continue-on-error SOLO para no bloquear el commit
+      # de eventos.json. Si falla, data/patrones.json anterior queda intacto y el
+      # motivo va al cuerpo del PR.
+      - name: Analizar y validar patrones
+        id: patrones
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run data:patrones 2>&1 | tee "$RUNNER_TEMP/patrones.log"
+          npm run data:validate-patrones 2>&1 | tee -a "$RUNNER_TEMP/patrones.log"
       - name: Tests
         run: npm test
       - name: Commit en la rama datos-diario y PR
+        env:
+          # El contexto `steps` solo existe a nivel de paso, no en el `env` del job.
+          PATRONES_RESULTADO: ${{ steps.patrones.outcome }}
         run: |
           if [ -z "$(git status --porcelain -- data/eventos.json)" ]; then
             echo "Sin cambios en data/eventos.json: no hay PR."
@@ -61,13 +74,21 @@ jobs:
           # La rama se reconstruye cada dia desde main: el PR abierto, si lo
           # hay, se actualiza en vez de acumular commits viejos.
           git checkout -B "$RAMA"
-          git add data/eventos.json
+          git add data/eventos.json data/patrones.json
           git commit -m "Datos: catalogo de sismos del USGS ($FECHA)"
           # Rama propia del bot, reconstruida desde main en cada corrida:
           # --force es seguro aqui (nunca apunta a main).
           git push --force origin "$RAMA"
           TITULO="Datos: catalogo de sismos del USGS ($FECHA)"
           CUERPO="$RUNNER_TEMP/informe.md"
+          if [ "$PATRONES_RESULTADO" = "success" ]; then
+            echo "**Patrones:** data/patrones.json regenerado y validado." >> "$CUERPO"
+          else
+            echo "**Patrones: FALLO** ($PATRONES_RESULTADO). data/patrones.json anterior sin cambios; la seccion Patrones se oculta si no coincide con el catalogo. Ultimas lineas del log:" >> "$CUERPO"
+            echo '~~~' >> "$CUERPO"
+            tail -n 20 "$RUNNER_TEMP/patrones.log" >> "$CUERPO" 2>/dev/null || true
+            echo '~~~' >> "$CUERPO"
+          fi
           printf '\n---\nGenerado por el workflow `fetch-eventos`. Revisar el diff antes de mergear (merge = deploy).\n' >> "$CUERPO"
           if [ "$(gh pr list --head "$RAMA" --state open --json number --jq length)" = "0" ]; then
             gh pr create --base main --head "$RAMA" --title "$TITULO" --body-file "$CUERPO"

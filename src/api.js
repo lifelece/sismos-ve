@@ -10,6 +10,7 @@
 import urlEventos from "../data/eventos.json?url";
 import urlLimites from "../data/limites-venezuela.geojson?url";
 import urlDisputa from "../data/zona-disputada.geojson?url";
+import urlPatrones from "../data/patrones.json?url";
 
 async function leerJson(url) {
   const r = await fetch(url);
@@ -24,4 +25,16 @@ export const leerEventos = () => leerJson(urlEventos);
 export async function leerLimites() {
   const [limites, disputa] = await Promise.all([leerJson(urlLimites), leerJson(urlDisputa)]);
   return { limites, disputa };
+}
+
+/**
+ * Patrones estadisticos del catalogo pasado (spec 001, RF-20). Si falta o no se
+ * puede leer devuelve null: la seccion se oculta, nada se calcula aqui.
+ */
+export async function leerPatrones() {
+  try {
+    return await leerJson(urlPatrones);
+  } catch {
+    return null;
+  }
 }

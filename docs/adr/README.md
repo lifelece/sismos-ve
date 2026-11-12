@@ -22,6 +22,7 @@ no se reescribe el que ya existe. El historial es el valor.
 | [ADR-007](ADR-007-carga-diferida-leaflet.md) | Carga diferida de Leaflet (trasplante JARVIS) | Aceptada (2026-10-21) |
 | [ADR-008](ADR-008-mapa-base-vectorial.md) | Mapa base vectorial propio mientras se decide el proveedor de teselas | Aceptada (2026-10-21): sin teselas |
 | [ADR-009](ADR-009-franja-costera-y-disputa-en-vista.md) | Franja costera de 50 km y zona en disputa en la vista por defecto | Aceptada (2026-10-21) |
+| [ADR-010](ADR-010-patrones-estadisticos.md) | Metodo estadistico de patrones: fuentes, constantes y limites | Propuesto (2026-11-08) |
 
 ## Plantilla
 

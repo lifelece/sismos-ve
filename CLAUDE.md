@@ -78,7 +78,7 @@ La funcionalidad "cerca de mi ciudad" (func. 4 de la ficha) se resuelve con un
 `navigator.geolocation` ni con la IP del visitante. Cero permisos del
 navegador, cero datos personales.
 
-### 5. Contrato de datos (propuesta, a validar por Luis)
+### 5. Contrato de datos (gate cerrado: Luis, 2026-10-21, ADR-003)
 
 El estandar del portafolio exige que todo registro lleve `fuente`,
 `confianza` y `ultima_verificacion`. Los eventos del USGS ya traen sus propios
@@ -88,7 +88,7 @@ sismos-ve **envuelve** el evento original sin reescribirlo, mapeando:
 | Campo del contrato | De donde sale | Nota |
 |---|---|---|
 | `fuente` | Fijo: `"USGS FDSN Event Web Service"`, mas `properties.net` y `properties.sources` del propio evento (que red/es lo reporto: `us`, `pr`, `nc`...) | El USGS agrega redes contribuyentes; conservamos cual fue |
-| `confianza` | Derivado de `properties.status` del USGS: `"reviewed"` -> `alta`, `"automatic"` -> `media` | Es el campo mas cercano que el USGS publica a una senal de confianza. Queda **a verificar por Luis** si esta escala (alta/media/baja) es la correcta para sismologia — ver Fase 1 |
+| `confianza` | Derivado de `properties.status` del USGS: `"reviewed"` -> `alta`, `"automatic"` -> `media` | Es el campo mas cercano que el USGS publica a una senal de confianza. Escala alta/media/baja aprobada en el gate de la Fase 1 (ADR-003) |
 | `ultima_verificacion` | Fecha (ISO 8601, solo fecha) en que la GitHub Action diaria corrio y escribio `eventos.json` | Distinta de `properties.updated` del USGS (cuando el USGS revisó el evento por ultima vez): una es "cuando nosotros lo bajamos", la otra "cuando el USGS lo toco" |
 
 Desde el gate de la Fase 1 (Luis, 2026-10-21, ADR-003) cada evento lleva
@@ -107,8 +107,14 @@ poligonos versionados en `data/`:
 El validador de la Fase 1 falla si un registro no tiene los tres campos del
 contrato y las tres etiquetas, ademas de magnitud y coordenadas.
 
-Esta propuesta queda para que Luis la apruebe o la ajuste en el gate de la
-Fase 0 antes de que la Fase 1 la implemente.
+El gate del contrato esta cerrado (Luis, 2026-10-21, ADR-003).
+
+**Datos derivados (spec 001, ADR-010):** `data/patrones.json` es un archivo
+derivado y versionado (generado por `scripts/analizar-patrones.mjs`, validado
+por `scripts/validate-patrones.mjs`). Cada zona lleva `fuente` ("Calculo de
+sismos-ve sobre USGS FDSN Event Web Service"), `confianza` fija "media" y la
+`ultima_verificacion` del catalogo. Es una descripcion estadistica del pasado:
+nunca prediccion ni "zona mas peligrosa" (regla 1).
 
 ### 6. No inventar datos
 
@@ -148,6 +154,7 @@ sismos-ve/
     ISSUE_TEMPLATE/       # Plantilla "Reportar dato incorrecto" (Fase 4)
   data/
     eventos.json          # Catalogo curado, fuente de verdad, versionado en Git
+    patrones.json         # Derivado de eventos.json (spec 001), versionado
   src/
     main.js                # Punto de entrada, orquesta
     config.js               # Constantes, ciudades curadas, entorno
@@ -155,10 +162,15 @@ sismos-ve/
     api.js                    # Lee data/eventos.json -> siempre FeatureCollection
     data.js                    # Validacion, normalizacion, contrato de datos
     ui.js                       # DOM: linea de tiempo, filtros, estadisticas, ficha
+    patrones.js                 # Logica pura del bloque Patrones (sin DOM)
     i18n/                       # es.json, en.json, t(clave)
   scripts/
     fetch-eventos.mjs           # Corre en la Action; consulta FDSN -> data/eventos.json
     validate-eventos.mjs         # Validador de contrato, falla el CI si falta un campo
+    analizar-patrones.mjs       # eventos.json -> data/patrones.json (spec 001, sin red)
+    validate-patrones.mjs       # Validador de patrones (esquema cerrado, IC; avisos de desactualizado)
+    ml/                         # Declustering, DBSCAN, Gutenberg-Richter, azar con semilla
+    medir-js.mjs                # Mide el JS propio gzip de dist/ (RNF-4)
 ```
 
 Este arbol es una prevision para orientar las fases siguientes. La Fase 0 NO

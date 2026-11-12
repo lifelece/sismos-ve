@@ -43,6 +43,19 @@ este proyecto lo verifico por ultima vez.
 **Si detectas un error, abre un issue.** Las correcciones con fuente se
 revisan y se aplican.
 
+### Sobre la seccion "Patrones" (estadistica del catalogo pasado)
+
+La seccion "Patrones" del panel de estadisticas es una **descripcion
+estadistica del catalogo pasado** (1990 hasta la fecha del catalogo). **No
+predice sismos**: no estima cuando, donde ni de que tamano ocurrira ninguno, y
+no senala zonas como mas o menos peligrosas. Sus zonas son agrupaciones de
+epicentros ya registrados y el valor b (la proporcion entre sismos pequenos y
+grandes) se calcula con su intervalo de confianza del 95 %, su magnitud de
+completitud, el tipo de magnitud y el numero de eventos. Las cifras dependen
+del metodo y de sus parametros (ver `docs/adr/ADR-010-patrones-estadisticos.md`),
+la completitud del catalogo cambio en 36 anos y una zona puede continuar fuera
+del area consultada. Los filtros de anos y magnitud no cambian estas cifras.
+
 ### Neutralidad
 
 Este proyecto describe la actividad sismica con datos y fuentes. **No toma
@@ -103,6 +116,20 @@ source, a confidence level, and the date this project last verified it.
 
 **If you find an error, please open an issue.** Corrections backed by a
 source are reviewed and applied.
+
+### About the "Patterns" section (statistics of the past catalog)
+
+The "Patterns" section of the statistics panel is a **statistical description
+of the past catalog** (1990 up to the catalog date). It **does not predict
+earthquakes**: it does not estimate when, where or how large any earthquake
+will be, and it does not mark zones as more or less dangerous. Its zones are
+groupings of epicenters already recorded, and the b value (the ratio of small
+to large earthquakes) is computed with its 95 % confidence interval, its
+magnitude of completeness, the magnitude type and the number of events. The
+figures depend on the method and its parameters (see
+`docs/adr/ADR-010-patrones-estadisticos.md`), catalog completeness changed
+over 36 years, and a zone may continue beyond the queried area. The year and
+magnitude filters do not change these figures.
 
 ### Neutrality
 
