@@ -17,6 +17,7 @@ import { agruparPorClase, controlAleatorio } from "./ml/dbscan.mjs";
 import { ajustarGR } from "./ml/gutenberg-richter.mjs";
 import { crearAzar, semillaDe } from "./ml/azar.mjs";
 import { redondear, huellaCatalogo, serializar } from "./ml/serializar.mjs";
+import { validarPatrones } from "./validate-patrones.mjs";
 import {
   PARAMETROS_GR,
   PARAMETROS_GK,
@@ -229,16 +230,19 @@ export function analizar(coleccion, opciones = {}) {
 }
 
 /**
- * Lee `entrada`, analiza y escribe `salida` de forma atomica (temporal + rename).
- * Si el analisis falla, no toca `salida`, borra el temporal y propaga el error.
- * (La validacion previa al reemplazo, RF-26, la anade T08.)
+ * Mecanismo de RF-26: escribe a `salida.tmp`, valida ese temporal con
+ * `validarPatrones` y solo sin errores lo renombra sobre `salida`. Si el
+ * analisis o la validacion fallan, borra el temporal, NO toca `salida` y
+ * propaga el error (el CLI sale con codigo 1). `validar` es inyectable para pruebas.
  */
-export function ejecutar({ entrada, salida, opciones = {} }) {
+export function ejecutar({ entrada, salida, opciones = {}, validar = validarPatrones }) {
   const coleccion = JSON.parse(readFileSync(entrada, "utf8"));
   const tmp = `${salida}.tmp`;
   try {
     const texto = serializar(analizar(coleccion, opciones));
     writeFileSync(tmp, texto);
+    const { errores } = validar(JSON.parse(readFileSync(tmp, "utf8")), coleccion);
+    if (errores.length > 0) throw new Error(`el resultado no valida (RF-26): ${errores.slice(0, 5).join("; ")}`);
     renameSync(tmp, salida);
     return texto;
   } catch (err) {

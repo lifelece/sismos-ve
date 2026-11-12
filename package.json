@@ -17,6 +17,7 @@
     "data:fetch": "node scripts/fetch-eventos.mjs",
     "data:validate": "node scripts/validate-eventos.mjs",
     "data:patrones": "node scripts/analizar-patrones.mjs",
+    "data:validate-patrones": "node scripts/validate-patrones.mjs",
     "data:etiquetar": "node scripts/etiquetar-eventos.mjs",
     "verificar:modulos": "node scripts/verificar-modulos.mjs"
   },

@@ -7,6 +7,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { analizar, ejecutar } from "../scripts/analizar-patrones.mjs";
@@ -221,5 +222,28 @@ test("sin fetch ni Math.random en scripts/ml/ ni en el CLI (RF-4, RNF-6)", () =>
   for (const url of archivos) {
     const texto = readFileSync(url, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
     assert.doesNotMatch(texto, /\bfetch\s*\(|https?:\/\/|XMLHttpRequest|node:https?|Math\.random/, url.pathname);
+  }
+});
+
+test("RF-26: analisis o validacion que fallan dejan intacto el archivo anterior y sin .tmp", () => {
+  const dir = mkdtempSync(join(tmpdir(), "patrones-"));
+  try {
+    const entrada = join(dir, "eventos.json");
+    const salida = join(dir, "patrones.json");
+    writeFileSync(entrada, JSON.stringify(coleccion(base())));
+    ejecutar({ entrada, salida, opciones: OPC });
+    const antes = createHash("sha256").update(readFileSync(salida)).digest("hex");
+    // 1) el resultado no valida
+    assert.throws(
+      () => ejecutar({ entrada, salida, opciones: { ...OPC, semillaBase: 99 }, validar: () => ({ errores: ["roto"], avisos: [] }) }),
+      /RF-26/,
+    );
+    // 2) el analisis falla (control aleatorio)
+    const permisivos = { ...OPC, agrupacion: { ...OPC.agrupacion, superficial: { epsKm: 400, minPts: 3 } } };
+    assert.throws(() => ejecutar({ entrada, salida, opciones: permisivos }), /RF-9/);
+    assert.equal(createHash("sha256").update(readFileSync(salida)).digest("hex"), antes);
+    assert.equal(existsSync(`${salida}.tmp`), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 });
