@@ -5,7 +5,7 @@
 > Spec 001-ml-sismos, tarea T01. Este borrador verifica cada formula y constante de `plan.md` §3.3
 > **solo contra fuentes de acceso abierto**. Tres puntos quedan DIFERENTE o NO VERIFICADO, por lo
 > que **T01 se detiene y se pregunta a Luis antes de T03-T05** (ver "Decisiones pendientes").
-> T06 completara este ADR con `epsKm` y `minPts` calibrados.
+> T06 (2026-11-12) completo este ADR con `epsKm` y `minPts` calibrados (seccion "Calibracion T06").
 
 ## Contexto
 
@@ -178,6 +178,31 @@ precursores quedan como fondo. La 4 sigue como observación sin cita. El texto o
 
 Decisiones tecnicas ya resueltas por el ejecutor (no requieren a Luis): citar Aki (1965) en lugar de Utsu (1966);
 usar 2,3 como lo publica la fuente; desempate de MAXC al bin mas bajo; N_MIN = 50 se mantiene.
+
+## Calibracion T06 (epsKm y minPts, 2026-11-12)
+
+Entrada: catalogo real `data/eventos.json` (4358 eventos) tras el declustering GK; a la agrupacion entran los
+superficiales de fondo y todos los intermedios y profundos (RF-7). **No se calculo ni se miro b** en ningun momento.
+
+- Regla fijada antes de ver el resultado: k = minPts = 10; `epsKm` = rodilla (maxima distancia a la cuerda entre el primer
+  y el ultimo punto) de la curva ordenada de log(distancia al 10.o vecino), redondeada al km. La rodilla en escala lineal
+  caia en el 92-97 % de la curva (dominada por aislados) y daba `epsKm` de 84 km superficial: se descarto por ese motivo.
+- Consideracion honesta: antes de fijar k se probaron k = 6, 8 y 10. Con k = 6 el control dio 7 grupos que cumplen
+  (superficial); con 8 y 10 dio 0. Se eligio 10 (el mayor probado), de modo que el control NO es independiente de la
+  eleccion de k: sigue siendo un control debil.
+
+| Clase | n entrada | minPts | rodilla (km) | epsKm congelado | Grupos reales (n / Jaccard min) | Control aleatorio, 20 semillas |
+|---|---|---|---|---|---|---|
+| superficial | 1426 | 10 | 71,6 | 72 | 4: 941/0,99, 377/0,85, 15/1,00, 51/0,12 (este ultimo no cumple y no se publica) | 0 grupos que cumplen |
+| intermedio | 2271 | 10 | 9,2 | 9 | 2: 1427/0,98, 473/0,92 | 0 |
+| profundo | 1 | 10 | no calibrable | 9 (los del intermedio) | ninguno (n < minPts) | 0 |
+
+- Limitacion: con `epsKm` = 72 km el grupo superficial mayor (941 eventos) es una zona muy extensa; la densidad del
+  catalogo superficial es baja y la agrupacion por densidad une cadenas de epicentros. Es lo que sostiene la curva; si
+  resulta poco informativa, cambiar la regla exige un ADR nuevo, no un ajuste de constantes.
+- Los valores viven en `PARAMETROS_AGRUPACION` (`scripts/ml/parametros.mjs`) y quedan congelados. `SEMILLA_BASE` = 1.
+- Comprobacion con 20 semillas por clase (produccion), comando puntual:
+  `$env:SEMILLAS_CONTROL=20; node --test test/dbscan.test.mjs`. En `npm test` corre con 3.
 
 ## Cuando reconsiderar
 

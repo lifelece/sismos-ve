@@ -17,7 +17,7 @@ import {
   agruparPorClase,
   controlAleatorio,
 } from "../scripts/ml/dbscan.mjs";
-import { PARAMETROS_DBSCAN } from "../scripts/ml/parametros.mjs";
+import { PARAMETROS_DBSCAN, PARAMETROS_AGRUPACION, SEMILLA_BASE } from "../scripts/ml/parametros.mjs";
 import { declustering } from "../scripts/ml/declustering.mjs";
 import { normalizarEvento, claseProfundidad } from "../src/data.js";
 import { crearAzar } from "../scripts/ml/azar.mjs";
@@ -166,5 +166,24 @@ test("control aleatorio (DEBIL): ruido uniforme con la n real por clase -> 0 gru
     if (nClase === 0) continue;
     const c = controlAleatorio(nClase, P, { semillaBase: 1, clase, semillas: SEMILLAS_CONTROL });
     assert.equal(c.gruposQueCumplen, 0, `clase ${clase} (n=${nClase})`);
+  }
+});
+
+test("T06: control aleatorio con los parametros CONGELADOS de produccion -> 0 grupos por clase", () => {
+  const json = JSON.parse(readFileSync(new URL("../data/eventos.json", import.meta.url), "utf8"));
+  const eventos = json.features.map(normalizarEvento);
+  const { asignaciones } = declustering(eventos);
+  const rol = new Map(asignaciones.map((a) => [a.id, a.rol]));
+  const n = { superficial: 0, intermedio: 0, profundo: 0 };
+  for (const e of eventos) {
+    const r = rol.get(e.id);
+    if (r === undefined || r === "secuencia") continue;
+    n[claseProfundidad(e.prof).clave]++;
+  }
+  for (const [clase, nClase] of Object.entries(n)) {
+    const p = PARAMETROS_AGRUPACION[clase];
+    assert.ok(p && p.epsKm > 0 && p.minPts >= 1, `faltan parametros de ${clase}`);
+    const c = controlAleatorio(nClase, p, { semillaBase: SEMILLA_BASE, clase, semillas: SEMILLAS_CONTROL });
+    assert.equal(c.gruposQueCumplen, 0, `clase ${clase} (n=${nClase}, eps=${p.epsKm}, minPts=${p.minPts})`);
   }
 });

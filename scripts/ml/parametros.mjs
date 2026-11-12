@@ -59,3 +59,22 @@ export const PARAMETROS_DBSCAN = Object.freeze({
   factores: Object.freeze([0.8, 1.2]),
   jMin: 0.75,
 });
+
+/** Semilla base entera del analisis (plan 3.3 "Semillas"); la usa T07. */
+export const SEMILLA_BASE = 1;
+
+/**
+ * epsKm y minPts de produccion por clase de profundidad (T06, ADR-010 §T06).
+ * Calibrados UNA vez el 2026-11-12 con la curva de k-distancias (k = minPts = 10)
+ * del catalogo real tras el declustering, SIN calcular ni mirar b. Regla fijada
+ * antes de ver el resultado: eps = rodilla (maxima distancia a la cuerda) de la
+ * curva log(k-dist) ordenada, redondeada al km. Superficial: n = 1426, rodilla
+ * 71,6 -> 72. Intermedio: n = 2271, rodilla 9,2 -> 9. Profundo: n = 1, no es
+ * calibrable; reutiliza los del intermedio (con n < minPts nunca forma grupos).
+ * Congelados: cambiarlos exige un ADR nuevo.
+ */
+export const PARAMETROS_AGRUPACION = Object.freeze({
+  superficial: Object.freeze({ epsKm: 72, minPts: 10 }),
+  intermedio: Object.freeze({ epsKm: 9, minPts: 10 }),
+  profundo: Object.freeze({ epsKm: 9, minPts: 10 }),
+});
