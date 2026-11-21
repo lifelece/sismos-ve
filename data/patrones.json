@@ -1,10 +1,10 @@
 {
   "metadata": {
     "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
-    "ultima_verificacion": "2026-11-11",
+    "ultima_verificacion": "2026-11-20",
     "atribucion": "Datos: U.S. Geological Survey (USGS), dominio publico",
     "catalogo_n": 4360,
-    "catalogo_sha256": "76045241bb42df4c7f4a5ec028a1c16811006ac5cc76db173082c9b582d98598",
+    "catalogo_sha256": "fa3318b9971ecb347a1d7c87ab71aecdd39e4a728a728203b39a389dfc8211f0",
     "metodo": {
       "version": "1",
       "declustering": "gardner-knopoff-1974",
@@ -120,7 +120,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-11"
+      "ultima_verificacion": "2026-11-20"
     },
     {
       "id": "S01",
@@ -168,7 +168,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-11"
+      "ultima_verificacion": "2026-11-20"
     },
     {
       "id": "S02",
@@ -222,7 +222,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-11"
+      "ultima_verificacion": "2026-11-20"
     },
     {
       "id": "I02",
@@ -276,7 +276,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-11"
+      "ultima_verificacion": "2026-11-20"
     },
     {
       "id": "S03",
@@ -330,7 +330,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-11"
+      "ultima_verificacion": "2026-11-20"
     }
   ]
 }
