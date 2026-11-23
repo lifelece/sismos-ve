@@ -1,10 +1,10 @@
 {
   "metadata": {
     "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
-    "ultima_verificacion": "2026-11-20",
+    "ultima_verificacion": "2026-11-23",
     "atribucion": "Datos: U.S. Geological Survey (USGS), dominio publico",
-    "catalogo_n": 4360,
-    "catalogo_sha256": "fa3318b9971ecb347a1d7c87ab71aecdd39e4a728a728203b39a389dfc8211f0",
+    "catalogo_n": 4361,
+    "catalogo_sha256": "a494a09d5fe4c7307f74047f561de4ae3cec28f72196ecc64a3ec8238a89eb6c",
     "metodo": {
       "version": "1",
       "declustering": "gardner-knopoff-1974",
@@ -61,7 +61,7 @@
       "grupos_max": 0
     },
     "resumen": {
-      "fondo": 1426,
+      "fondo": 1427,
       "secuencia": 662,
       "no_aplica": 2272,
       "sin_zona": 471
@@ -120,7 +120,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-20"
+      "ultima_verificacion": "2026-11-23"
     },
     {
       "id": "S01",
@@ -168,19 +168,19 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-20"
+      "ultima_verificacion": "2026-11-23"
     },
     {
       "id": "S02",
       "clase_profundidad": "superficial",
-      "n_eventos": 544,
-      "n_fondo": 377,
+      "n_eventos": 545,
+      "n_fondo": 378,
       "n_secuencia": 167,
       "n_no_aplica": 0,
-      "n_en_vista_venezuela": 365,
+      "n_en_vista_venezuela": 366,
       "centro": {
-        "lat": 8.5559,
-        "lon": -71.0045
+        "lat": 8.56,
+        "lon": -71.0031
       },
       "caja": [
         -73.49,
@@ -192,10 +192,10 @@
       "lugar_usgs_frecuente": "Carora, Venezuela",
       "periodo": {
         "desde": "1990-04-07",
-        "hasta": "2026-09-29"
+        "hasta": "2026-11-22"
       },
       "territorio": {
-        "venezuela": 332,
+        "venezuela": 333,
         "costa": 33,
         "disputa": 0,
         "fuera": 179
@@ -216,13 +216,13 @@
         "b": 2.161,
         "b_ic95": [
           1.791,
-          2.561
+          2.585
         ],
         "b_sigma_shi_bolt": 0.187
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-20"
+      "ultima_verificacion": "2026-11-23"
     },
     {
       "id": "I02",
@@ -276,7 +276,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-20"
+      "ultima_verificacion": "2026-11-23"
     },
     {
       "id": "S03",
@@ -330,7 +330,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-20"
+      "ultima_verificacion": "2026-11-23"
     }
   ]
 }
