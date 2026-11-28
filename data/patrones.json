@@ -1,10 +1,10 @@
 {
   "metadata": {
     "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
-    "ultima_verificacion": "2026-11-23",
+    "ultima_verificacion": "2026-11-28",
     "atribucion": "Datos: U.S. Geological Survey (USGS), dominio publico",
-    "catalogo_n": 4361,
-    "catalogo_sha256": "a494a09d5fe4c7307f74047f561de4ae3cec28f72196ecc64a3ec8238a89eb6c",
+    "catalogo_n": 4362,
+    "catalogo_sha256": "5a88f494af3ab1ca4430983cbcba29828d233c6f85982193dd2fbad39a2706d6",
     "metodo": {
       "version": "1",
       "declustering": "gardner-knopoff-1974",
@@ -63,7 +63,7 @@
     "resumen": {
       "fondo": 1427,
       "secuencia": 662,
-      "no_aplica": 2272,
+      "no_aplica": 2273,
       "sin_zona": 471
     }
   },
@@ -71,14 +71,14 @@
     {
       "id": "I01",
       "clase_profundidad": "intermedio",
-      "n_eventos": 1427,
+      "n_eventos": 1428,
       "n_fondo": 0,
       "n_secuencia": 0,
-      "n_no_aplica": 1427,
+      "n_no_aplica": 1428,
       "n_en_vista_venezuela": 0,
       "centro": {
         "lat": 6.7964,
-        "lon": -73.0103
+        "lon": -73.0104
       },
       "caja": [
         -73.399,
@@ -90,13 +90,13 @@
       "lugar_usgs_frecuente": "Cepitá, Colombia",
       "periodo": {
         "desde": "1990-01-01",
-        "hasta": "2026-10-13"
+        "hasta": "2026-11-02"
       },
       "territorio": {
         "venezuela": 0,
         "costa": 0,
         "disputa": 0,
-        "fuera": 1427
+        "fuera": 1428
       },
       "sensibilidad": {
         "jaccard_min": 0.975
@@ -113,14 +113,14 @@
         ],
         "b": 2.207,
         "b_ic95": [
-          2.004,
-          2.408
+          2,
+          2.419
         ],
         "b_sigma_shi_bolt": 0.099
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-23"
+      "ultima_verificacion": "2026-11-28"
     },
     {
       "id": "S01",
@@ -168,7 +168,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-23"
+      "ultima_verificacion": "2026-11-28"
     },
     {
       "id": "S02",
@@ -222,7 +222,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-23"
+      "ultima_verificacion": "2026-11-28"
     },
     {
       "id": "I02",
@@ -276,7 +276,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-23"
+      "ultima_verificacion": "2026-11-28"
     },
     {
       "id": "S03",
@@ -330,7 +330,7 @@
       },
       "fuente": "Cálculo de sismos-ve sobre USGS FDSN Event Web Service",
       "confianza": "media",
-      "ultima_verificacion": "2026-11-23"
+      "ultima_verificacion": "2026-11-28"
     }
   ]
 }
